@@ -1,0 +1,13 @@
+name: Data ingestion
+on: ["push", "workflow_dispatch"]
+jobs:
+  test:
+    environment: glvd-data-ingestion
+    name: data ingestion
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "${{ vars.PGDATABASE }}"
+          echo "${{ vars.PGHOST }}"
+          echo "${{ vars.PGPORT }}"
+          echo "${{ vars.PGUSER }}"
