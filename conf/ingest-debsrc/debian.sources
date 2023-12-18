@@ -1,0 +1,6 @@
+Enabled: yes
+Types: deb-src
+URIs: https://deb.debian.org/debian 
+Suites: buster bullseye bookworm trixie
+Components: main 
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
