@@ -1,13 +1,118 @@
 name: Data ingestion
-on: ["push", "workflow_dispatch"]
+on: 
+  push:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 2 * * *'
 jobs:
-  test:
+  data_ingestion:
     environment: glvd-data-ingestion
     name: data ingestion
     runs-on: ubuntu-latest
+
+    env:
+      PGHOST: "${{ vars.PGHOST }}"
+      PGPORT: "${{ vars.PGPORT }}"
+      PGUSER: "${{ vars.PGUSER }}"
+      PGPASSWORD: "${{ secrets.PGPASSWORD }}"
+      PGDATABASE: "${{ vars.PGDATABASE }}"
+    
     steps:
-      - run: |
-          echo "${{ vars.PGDATABASE }}"
-          echo "${{ vars.PGHOST }}"
-          echo "${{ vars.PGPORT }}"
-          echo "${{ vars.PGUSER }}"
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Prepare data ingestion
+      run: ./src/prepare_ingestion.sh
+
+    - name: Run data ingestion (ingest-debsec - debian)
+      run: >
+        docker run
+        --network host
+        --rm
+        --volume $PWD/tmp/:/opt/glvd-data-ingestion
+        --entrypoint=""
+        --env PGHOST
+        --env PGPORT
+        --env PGUSER
+        --env PGPASSWORD
+        --env PGDATABASE
+        ghcr.io/gardenlinux/glvd:edge
+        /bin/sh -c 'glvd-data ingest-debsec debian /opt/glvd-data-ingestion/ingest-debsec/debian'
+
+    - name: Run data ingestion (ingest-debsec - gardenlinux)
+      run: >
+        docker run
+        --network host
+        --rm
+        --volume $PWD/tmp/:/opt/glvd-data-ingestion
+        --entrypoint=""
+        --env PGHOST
+        --env PGPORT
+        --env PGUSER
+        --env PGPASSWORD
+        --env PGDATABASE
+        ghcr.io/gardenlinux/glvd:edge
+        /bin/sh -c 'glvd-data ingest-debsec gardenlinux /opt/glvd-data-ingestion/ingest-debsec/gardenlinux'
+
+    - name: Run data ingestion (ingest-debsrc - debian buster)
+      run: >
+        docker run
+        --network host
+        --rm
+        --volume $PWD/tmp/:/opt/glvd-data-ingestion
+        --entrypoint=""
+        --env PGHOST
+        --env PGPORT
+        --env PGUSER
+        --env PGPASSWORD
+        --env PGDATABASE
+        ghcr.io/gardenlinux/glvd:edge
+        /bin/sh -c 'glvd-data ingest-debsrc debian buster /opt/glvd-data-ingestion/ingest-debsrc/lists/deb.debian.org_debian_dists_buster_main_source_Sources'
+
+    - name: Run data ingestion (ingest-debsrc - debian bullseye)
+      run: >
+        docker run
+        --network host
+        --rm
+        --volume $PWD/tmp/:/opt/glvd-data-ingestion
+        --entrypoint=""
+        --env PGHOST
+        --env PGPORT
+        --env PGUSER
+        --env PGPASSWORD
+        --env PGDATABASE
+        ghcr.io/gardenlinux/glvd:edge
+        /bin/sh -c 'glvd-data ingest-debsrc debian bullseye /opt/glvd-data-ingestion/ingest-debsrc/lists/deb.debian.org_debian_dists_bullseye_main_source_Sources'
+
+    - name: Run data ingestion (ingest-debsrc - debian bookworm)
+      run: >
+        docker run
+        --network host
+        --rm
+        --volume $PWD/tmp/:/opt/glvd-data-ingestion
+        --entrypoint=""
+        --env PGHOST
+        --env PGPORT
+        --env PGUSER
+        --env PGPASSWORD
+        --env PGDATABASE
+        ghcr.io/gardenlinux/glvd:edge
+        /bin/sh -c 'glvd-data ingest-debsrc debian bookworm /opt/glvd-data-ingestion/ingest-debsrc/lists/deb.debian.org_debian_dists_bookworm_main_source_Sources'
+
+    - name: Run data ingestion (ingest-debsrc - debian trixie)
+      run: >
+        docker run
+        --network host
+        --rm
+        --volume $PWD/tmp/:/opt/glvd-data-ingestion
+        --entrypoint=""
+        --env PGHOST
+        --env PGPORT
+        --env PGUSER
+        --env PGPASSWORD
+        --env PGDATABASE
+        ghcr.io/gardenlinux/glvd:edge
+        /bin/sh -c 'glvd-data ingest-debsrc debian trixie /opt/glvd-data-ingestion/ingest-debsrc/lists/deb.debian.org_debian_dists_trixie_main_source_Sources'
