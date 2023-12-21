@@ -116,3 +116,31 @@ jobs:
         --env PGDATABASE
         ghcr.io/gardenlinux/glvd:edge
         /bin/sh -c 'glvd-data ingest-debsrc debian trixie /opt/glvd-data-ingestion/ingest-debsrc/lists/deb.debian.org_debian_dists_trixie_main_source_Sources'
+
+    - name: Run data combination (combine-deb)
+      run: >
+        docker run
+        --network host
+        --rm
+        --entrypoint=""
+        --env PGHOST
+        --env PGPORT
+        --env PGUSER
+        --env PGPASSWORD
+        --env PGDATABASE
+        ghcr.io/gardenlinux/glvd:edge
+        /bin/sh -c 'glvd-data combine-deb'
+    
+    - name: Run data combination (combine-all)
+      run: >
+        docker run
+        --network host
+        --rm
+        --entrypoint=""
+        --env PGHOST
+        --env PGPORT
+        --env PGUSER
+        --env PGPASSWORD
+        --env PGDATABASE
+        ghcr.io/gardenlinux/glvd:edge
+        /bin/sh -c 'glvd-data combine-all'
