@@ -1,9 +1,6 @@
 name: Data ingestion
 on: 
-  push:
   workflow_dispatch:
-  schedule:
-    - cron: '0 2 * * *'
 jobs:
   data_ingestion:
     environment: glvd-data-ingestion
