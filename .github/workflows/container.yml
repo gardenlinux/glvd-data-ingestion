@@ -17,5 +17,7 @@ jobs:
     - name: Build image for tests
       uses: docker/build-push-action@v6
       with:
+        file: Containerfile
+        platforms: linux/amd64,linux/arm64
         push: true
         tags: ghcr.io/gardenlinux/glvd-data-ingestion:edge
