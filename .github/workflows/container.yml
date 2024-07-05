@@ -2,6 +2,11 @@ name: Data ingestion Container
 on: 
   workflow_dispatch:
   push:
+permissions:
+  # Checkout repository
+  contents: read
+  # Push container images
+  packages: write
 jobs:
   data_ingestion:
     name: data ingestion
