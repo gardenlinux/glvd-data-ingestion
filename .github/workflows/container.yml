@@ -1,6 +1,7 @@
 name: Data ingestion Container
 on: 
   workflow_dispatch:
+  push:
 jobs:
   data_ingestion:
     name: data ingestion
