@@ -56,7 +56,13 @@ glvd-data ingest-debsrc gardenlinux 1443.7 ./gardenlinux-packages/1443.7
 echo "Run data ingestion (ingest-debsrc - gardenlinux 1443.8)"
 glvd-data ingest-debsrc gardenlinux 1443.8 ./gardenlinux-packages/1443.8
 echo "Run data ingestion (ingest-debsrc - gardenlinux 1443.9)"
-glvd-data ingest-debsrc gardenlinux 1443 ./gardenlinux-packages/1443.9
+glvd-data ingest-debsrc gardenlinux 1443.9 ./gardenlinux-packages/1443.9
+echo "Run data ingestion (ingest-debsrc - gardenlinux 1443.10)"
+glvd-data ingest-debsrc gardenlinux 1443 ./gardenlinux-packages/1443.10
+echo "Run data ingestion (ingest-debsrc - gardenlinux 1592.0)"
+glvd-data ingest-debsrc gardenlinux 1592.0 ./gardenlinux-packages/1592.0
+echo "Run data ingestion (ingest-debsrc - gardenlinux 1592.1)"
+glvd-data ingest-debsrc gardenlinux 1592 ./gardenlinux-packages/1592.1
 echo "Run data ingestion (nvd)"
 glvd-data ingest-nvd
 echo "Run data combination (combine-deb)"
