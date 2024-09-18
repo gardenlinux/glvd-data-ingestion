@@ -1,4 +1,5 @@
 import requests
+import json
 
 # automatically create a list of minor versions for a given list of major version
 
@@ -26,3 +27,6 @@ for v in major_versions:
             break
 
 print(found_versions)
+
+with open('gardenlinux-versions.json', 'w', encoding='utf-8') as f:
+    json.dump(found_versions, f, ensure_ascii=False, indent=4)
