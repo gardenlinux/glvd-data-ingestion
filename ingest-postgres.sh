@@ -34,6 +34,7 @@ curl -s https://packages.gardenlinux.io/gardenlinux/dists/1592.0/main/binary-amd
 curl -s https://packages.gardenlinux.io/gardenlinux/dists/1592.1/main/binary-amd64/Packages.gz > gardenlinux-packages/1592.1.gz
 curl -s https://packages.gardenlinux.io/gardenlinux/dists/today/main/binary-amd64/Packages.gz > gardenlinux-packages/today.gz
 gunzip gardenlinux-packages/1443*.gz
+gunzip gardenlinux-packages/1592*.gz
 gunzip gardenlinux-packages/today.gz
 
 echo "Run data ingestion (ingest-debsrc - debian trixie)"
