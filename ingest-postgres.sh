@@ -29,6 +29,9 @@ curl -s https://packages.gardenlinux.io/gardenlinux/dists/1443.5/main/binary-amd
 curl -s https://packages.gardenlinux.io/gardenlinux/dists/1443.7/main/binary-amd64/Packages.gz > gardenlinux-packages/1443.7.gz
 curl -s https://packages.gardenlinux.io/gardenlinux/dists/1443.8/main/binary-amd64/Packages.gz > gardenlinux-packages/1443.8.gz
 curl -s https://packages.gardenlinux.io/gardenlinux/dists/1443.9/main/binary-amd64/Packages.gz > gardenlinux-packages/1443.9.gz
+curl -s https://packages.gardenlinux.io/gardenlinux/dists/1443.10/main/binary-amd64/Packages.gz > gardenlinux-packages/1443.10.gz
+curl -s https://packages.gardenlinux.io/gardenlinux/dists/1592.0/main/binary-amd64/Packages.gz > gardenlinux-packages/1592.0.gz
+curl -s https://packages.gardenlinux.io/gardenlinux/dists/1592.1/main/binary-amd64/Packages.gz > gardenlinux-packages/1592.1.gz
 curl -s https://packages.gardenlinux.io/gardenlinux/dists/today/main/binary-amd64/Packages.gz > gardenlinux-packages/today.gz
 gunzip gardenlinux-packages/1443*.gz
 gunzip gardenlinux-packages/today.gz
