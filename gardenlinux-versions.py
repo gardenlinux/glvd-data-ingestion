@@ -1,30 +1,30 @@
 import requests
 import json
+from datetime import date
 
-# automatically create a list of minor versions for a given list of major version
-
-major_versions = ['1443']
+current_version = 1443
+version_today = (date.today() - date(2020, 3, 31)).days
 
 found_versions = {}
 
-for m in major_versions:
-    found_versions[m] = []
-
-for v in major_versions:
+while current_version < version_today:
     skipped_versions = []
-    for p in range(0,30):
-        candidate_version = f'{v}.{p}'
+    found_versions[str(current_version)] = []
+    for patch_version in range(0,30):
+        candidate_version = f'{current_version}.{patch_version}'
         print(f'testing {candidate_version}')
-        r = requests.head(f'https://packages.gardenlinux.io/gardenlinux/dists/{v}.{p}/main/binary-amd64/Packages.gz')
+        r = requests.head(f'https://packages.gardenlinux.io/gardenlinux/dists/{current_version}.{patch_version}/main/binary-amd64/Packages.gz')
         if r.status_code == 200:
             print(f'found {candidate_version}')
-            found_versions[v].append(candidate_version)
+            found_versions[str(current_version)].append(candidate_version)
             skipped_versions = []
         else:
             skipped_versions.append(candidate_version)
 
         if len(skipped_versions) > 4:
             break
+
+    current_version += 1
 
 print(found_versions)
 
