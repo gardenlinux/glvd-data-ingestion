@@ -1,4 +1,4 @@
-name: Dump GLVD Postgres Snapshot to sql file
+name: 02 - Dump GLVD Postgres Snapshot to sql file
 on:
   workflow_dispatch:
 
