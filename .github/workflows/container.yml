@@ -11,7 +11,7 @@ permissions:
   # Push container images
   packages: write
 jobs:
-  data_ingestion:
+  push-data-ingestion-container:
     name: data_ingestion
     runs-on: ubuntu-24.04
     env:

@@ -10,7 +10,7 @@ permissions:
   packages: write
 
 jobs:
-  build:
+  push-init-container:
     runs-on: ubuntu-24.04
     env:
       IMAGE_NAME: gardenlinux/glvd-postgres-init
