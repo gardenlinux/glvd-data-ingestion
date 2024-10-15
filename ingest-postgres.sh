@@ -20,10 +20,10 @@ APT_CONFIG=conf/ingest-debsrc/apt.conf apt-get -q update \
 -o Dir="$PWD/data/ingest-debsrc/" \
 -o Dir::Etc::sourcelist="$PWD/conf/ingest-debsrc/debian.sources" \
 -o Dir::State="$PWD/data/ingest-debsrc/"
-APT_CONFIG=conf/ingest-debsrc/apt.conf apt-get -q update \
--o Dir="$PWD/data/ingest-debsrc/" \
--o Dir::Etc::sourcelist="$PWD/conf/ingest-debsrc/gardenlinux.sources" \
--o Dir::State="$PWD/data/ingest-debsrc/"
+# APT_CONFIG=conf/ingest-debsrc/apt.conf apt-get -q update \
+# -o Dir="$PWD/data/ingest-debsrc/" \
+# -o Dir::Etc::sourcelist="$PWD/conf/ingest-debsrc/gardenlinux.sources" \
+# -o Dir::State="$PWD/data/ingest-debsrc/"
 
 git clone --depth=1 https://salsa.debian.org/security-tracker-team/security-tracker
 
@@ -34,8 +34,13 @@ glvd-data ingest-debsrc debian bookworm data/ingest-debsrc/lists/deb.debian.org_
 echo "Run data ingestion (ingest-debsec - debian)"
 glvd-data ingest-debsec debian security-tracker/data
 
+# temp until we have proper versions with source repo
 echo "Run data ingestion (ingest-debsrc - gardenlinux today)"
-glvd-data ingest-debsrc gardenlinux today ./gardenlinux-packages/today
+glvd-data ingest-debsrc gardenlinux today data/packages.gardenlinux.io_gardenlinux_dists_experimental_main_source_Sources
+
+echo "Run data ingestion (ingest-debsrc - gardenlinux 1592.1)"
+glvd-data ingest-debsrc gardenlinux 1592.1 data/packages.gardenlinux.io_gardenlinux_dists_experimental_main_source_Sources
+
 
 echo "Run data ingestion (nvd)"
 glvd-data ingest-nvd
