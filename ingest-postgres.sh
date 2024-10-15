@@ -36,10 +36,10 @@ glvd-data ingest-debsec debian security-tracker/data
 
 # temp until we have proper versions with source repo
 echo "Run data ingestion (ingest-debsrc - gardenlinux today)"
-glvd-data ingest-debsrc gardenlinux today data/packages.gardenlinux.io_gardenlinux_dists_experimental_main_source_Sources
+glvd-data ingest-debsrc gardenlinux today /usr/local/src/data/packages.gardenlinux.io_gardenlinux_dists_experimental_main_source_Sources
 
 echo "Run data ingestion (ingest-debsrc - gardenlinux 1592.1)"
-glvd-data ingest-debsrc gardenlinux 1592.1 data/packages.gardenlinux.io_gardenlinux_dists_experimental_main_source_Sources
+glvd-data ingest-debsrc gardenlinux 1592.1 /usr/local/src/data/packages.gardenlinux.io_gardenlinux_dists_experimental_main_source_Sources
 
 
 echo "Run data ingestion (nvd)"
