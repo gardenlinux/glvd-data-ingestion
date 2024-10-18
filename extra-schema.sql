@@ -105,9 +105,10 @@ CREATE TABLE public.cve_context (
     dist_id integer NOT NULL,
     cve_id text NOT NULL,
     create_date timestamp with time zone DEFAULT now() NOT NULL,
-    context_descriptor text NOT NULL, -- i.e. what version does this apply to
+    context_descriptor text NOT NULL, -- i.e. what variant/environment/image-type does this apply to?
     score_override numeric,
-    description text NOT NULL
+    description text NOT NULL,
+    is_resolved boolean DEFAULT TRUE
 );
 
 ALTER TABLE public.cve_context OWNER TO glvd;
