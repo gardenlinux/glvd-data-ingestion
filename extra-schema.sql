@@ -94,3 +94,23 @@ CREATE OR REPLACE VIEW public.cvedetails
 
 ALTER TABLE public.cvedetails
     OWNER TO glvd;
+
+-- Table: public.cve_context
+-- NOTE: This is WIP
+-- The purpose of this table is to add context information for CVEs.
+-- A CVE with context information will not be visible in the default view.
+-- Context information might be something like 'this does not apply in usage scenario xy'
+
+CREATE TABLE public.cve_context (
+    dist_id integer NOT NULL,
+    cve_id text NOT NULL,
+    create_date timestamp with time zone DEFAULT now() NOT NULL,
+    context_descriptor text NOT NULL, -- i.e. what version does this apply to
+    score_override numeric,
+    description text NOT NULL
+);
+
+ALTER TABLE public.cve_context OWNER TO glvd;
+
+ALTER TABLE ONLY public.cve_context
+    ADD CONSTRAINT cve_context_pkey PRIMARY KEY (dist_id, cve_id, create_date, context_descriptor);
