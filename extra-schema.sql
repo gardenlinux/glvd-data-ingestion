@@ -131,3 +131,8 @@ CREATE OR REPLACE VIEW public.cve_with_context
 ALTER TABLE public.cve_with_context
     OWNER TO glvd;
 
+
+-- Query to filter sourcepackagecve with context
+-- select * from sourcepackagecve
+-- left outer join cve_with_context using (cve_id)
+-- where cve_with_context.cve_id is null;
