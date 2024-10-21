@@ -115,3 +115,19 @@ ALTER TABLE public.cve_context OWNER TO glvd;
 
 ALTER TABLE ONLY public.cve_context
     ADD CONSTRAINT cve_context_pkey PRIMARY KEY (dist_id, cve_id, create_date, context_descriptor);
+
+
+-- View: public.cve_with_context
+
+-- DROP VIEW public.cve_with_context;
+
+CREATE OR REPLACE VIEW public.cve_with_context
+ AS
+ SELECT cve_context.dist_id,
+    cve_context.cve_id
+   FROM cve_context
+  GROUP BY cve_context.dist_id, cve_context.cve_id;
+
+ALTER TABLE public.cve_with_context
+    OWNER TO glvd;
+
