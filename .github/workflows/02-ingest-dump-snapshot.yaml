@@ -32,11 +32,8 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
 
-      - name: download newer script
-        run: curl -L https://github.com/gardenlinux/glvd-data-ingestion/raw/refs/heads/apt-source-repo/ingest-postgres.sh > ./ingest-postgres.sh; chmod +x ./ingest-postgres.sh
-
       - name: Ingest Data
-        run: ./ingest-postgres.sh
+        run: /usr/local/src/ingest-postgres.sh
 
       - run: |
           echo "$PGHOST:$PGPORT:$PGDATABASE:$PGUSER:$PGPASSWORD" > ~/.pgpass
