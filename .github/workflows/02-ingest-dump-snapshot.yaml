@@ -43,6 +43,9 @@ jobs:
           chmod 0600 ~/.pgpass
 
       - run: psql glvd -f extra-schema.sql
+      
+      # Temporary: Have some dummy context to get rid of too many 'open' CVE
+      - run: psql glvd -f dummy_cve_context.sql
 
       - name: Dump Database Snapshot
         run: |
