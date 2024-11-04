@@ -1,0 +1,6 @@
+Enabled: yes
+Types: deb-src
+URIs: https://packages.gardenlinux.io/gardenlinux
+Suites: today
+Components: main 
+Signed-By: /etc/apt/trusted.gpg.d/keyring.asc
