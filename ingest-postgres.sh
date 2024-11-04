@@ -27,9 +27,9 @@ apt-get update \
 git clone --depth=1 https://salsa.debian.org/security-tracker-team/security-tracker
 
 echo "Run data ingestion (ingest-debsrc - debian trixie)"
-glvd-data ingest-debsrc debian trixie data/ingest-debsrc/lists/deb.debian.org_debian_dists_trixie_main_source_Sources
+glvd-data ingest-debsrc debian trixie /usr/local/src/data/ingest-debsrc/lists/deb.debian.org_debian_dists_trixie_main_source_Sources
 echo "Run data ingestion (ingest-debsrc - debian bookworm)"
-glvd-data ingest-debsrc debian bookworm data/ingest-debsrc/lists/deb.debian.org_debian_dists_bookworm_main_source_Sources
+glvd-data ingest-debsrc debian bookworm /usr/local/src/data/ingest-debsrc/lists/deb.debian.org_debian_dists_bookworm_main_source_Sources
 echo "Run data ingestion (ingest-debsec - debian)"
 glvd-data ingest-debsec debian security-tracker/data
 
