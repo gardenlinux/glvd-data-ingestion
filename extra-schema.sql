@@ -48,6 +48,36 @@ CREATE OR REPLACE VIEW public.sourcepackagecve
 ALTER TABLE public.sourcepackagecve
     OWNER TO glvd;
 
+
+-- View: public.recentsourcepackagecve
+
+-- DROP VIEW public.recentsourcepackagecve;
+
+CREATE OR REPLACE VIEW public.recentsourcepackagecve
+ AS
+ SELECT sourcepackagecve.cve_id,
+    sourcepackagecve.source_package_name,
+    sourcepackagecve.source_package_version,
+    sourcepackagecve.gardenlinux_version,
+    sourcepackagecve.is_vulnerable,
+    sourcepackagecve.cve_published_date,
+    sourcepackagecve.base_score,
+    sourcepackagecve.vector_string,
+    sourcepackagecve.base_score_v40,
+    sourcepackagecve.base_score_v31,
+    sourcepackagecve.base_score_v30,
+    sourcepackagecve.base_score_v2,
+    sourcepackagecve.vector_string_v40,
+    sourcepackagecve.vector_string_v31,
+    sourcepackagecve.vector_string_v30,
+    sourcepackagecve.vector_string_v2
+   FROM sourcepackagecve
+  WHERE sourcepackagecve.cve_published_date::timestamp with time zone > (now() - '10 days'::interval);
+
+ALTER TABLE public.recentsourcepackagecve
+    OWNER TO glvd;
+
+
 -- View: public.sourcepackage
 
 -- DROP VIEW public.sourcepackage;
