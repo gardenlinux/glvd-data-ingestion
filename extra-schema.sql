@@ -1,3 +1,45 @@
+-- Table: public.cve_context
+-- NOTE: This is WIP
+-- The purpose of this table is to add context information for CVEs.
+-- A CVE with context information will not be visible in the default view.
+-- Context information might be something like 'this does not apply in usage scenario xy'
+
+CREATE TABLE public.cve_context (
+    dist_id integer NOT NULL,
+    cve_id text NOT NULL,
+    create_date timestamp with time zone DEFAULT now() NOT NULL,
+    context_descriptor text NOT NULL, -- i.e. what variant/environment/image-type does this apply to?
+    score_override numeric,
+    description text NOT NULL,
+    is_resolved boolean DEFAULT TRUE
+);
+
+ALTER TABLE public.cve_context OWNER TO glvd;
+
+ALTER TABLE ONLY public.cve_context
+    ADD CONSTRAINT cve_context_pkey PRIMARY KEY (dist_id, cve_id, create_date, context_descriptor);
+
+
+-- View: public.cve_with_context
+
+-- DROP VIEW public.cve_with_context;
+
+CREATE OR REPLACE VIEW public.cve_with_context
+ AS
+ SELECT cve_context.dist_id,
+    cve_context.cve_id
+   FROM cve_context
+  GROUP BY cve_context.dist_id, cve_context.cve_id;
+
+ALTER TABLE public.cve_with_context
+    OWNER TO glvd;
+
+
+-- Query to filter sourcepackagecve with context
+-- select * from sourcepackagecve
+-- left outer join cve_with_context using (cve_id)
+-- where cve_with_context.cve_id is null;
+
 -- View: public.sourcepackagecve
 
 -- DROP VIEW public.sourcepackagecve;
@@ -9,6 +51,7 @@ CREATE OR REPLACE VIEW public.sourcepackagecve
     deb_cve.deb_version AS source_package_version,
     dist_cpe.cpe_version AS gardenlinux_version,
     deb_cve.debsec_vulnerable AS is_vulnerable,
+    cve_context.is_resolved AS is_resolved,
     all_cve.data ->> 'published'::text AS cve_published_date,
     CASE
      WHEN (data->'metrics'->'cvssMetricV31'->0->'cvssData'->>'baseScore')::numeric IS NOT NULL THEN
@@ -41,9 +84,10 @@ CREATE OR REPLACE VIEW public.sourcepackagecve
    FROM all_cve
      JOIN deb_cve USING (cve_id)
      JOIN dist_cpe ON deb_cve.dist_id = dist_cpe.id
+     FULL JOIN cve_context USING (cve_id, dist_id)
   WHERE
     dist_cpe.cpe_product = 'gardenlinux'::text AND
-    deb_cve.debsec_vulnerable = TRUE;
+    ((deb_cve.debsec_vulnerable AND NOT cve_context.is_resolved) = TRUE OR cve_context.is_resolved IS NULL);
 
 ALTER TABLE public.sourcepackagecve
     OWNER TO glvd;
@@ -103,6 +147,7 @@ CREATE OR REPLACE VIEW public.cvedetails
  SELECT all_cve.cve_id AS cve_id,
     all_cve.data -> 'vulnStatus'::text AS vulnstatus,
     all_cve.data -> 'published'::text AS published,
+    array_agg(cve_context.description) AS cve_context_description,
     array_agg(dist_cpe.cpe_product) AS distro,
     array_agg(dist_cpe.cpe_version) AS distro_version,
     array_agg(deb_cve.debsec_vulnerable) AS is_vulnerable,
@@ -120,6 +165,7 @@ CREATE OR REPLACE VIEW public.cvedetails
    FROM all_cve
      JOIN deb_cve USING (cve_id)
      JOIN dist_cpe ON deb_cve.dist_id = dist_cpe.id
+     FULL JOIN cve_context USING (cve_id, dist_id)
   GROUP BY all_cve.cve_id;
 
 ALTER TABLE public.cvedetails
