@@ -80,7 +80,7 @@ CREATE OR REPLACE VIEW public.sourcepackagecve
      JOIN deb_cve USING (cve_id)
      JOIN dist_cpe ON deb_cve.dist_id = dist_cpe.id
      FULL JOIN cve_context USING (cve_id, dist_id)
-  WHERE dist_cpe.cpe_product = 'gardenlinux'::text AND deb_cve.debsec_vulnerable = TRUE;
+  WHERE dist_cpe.cpe_product = 'gardenlinux'::text AND deb_cve.debsec_vulnerable = true;
 
 ALTER TABLE public.sourcepackagecve
     OWNER TO glvd;
