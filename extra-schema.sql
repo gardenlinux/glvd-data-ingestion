@@ -46,52 +46,44 @@ ALTER TABLE public.cve_with_context
 
 CREATE OR REPLACE VIEW public.sourcepackagecve
  AS
- SELECT all_cve.cve_id AS cve_id,
+ SELECT all_cve.cve_id,
     deb_cve.deb_source AS source_package_name,
     deb_cve.deb_version AS source_package_version,
     dist_cpe.cpe_version AS gardenlinux_version,
-    deb_cve.debsec_vulnerable AS is_vulnerable,
-    cve_context.is_resolved AS is_resolved,
+    (deb_cve.debsec_vulnerable AND cve_context.is_resolved IS NOT TRUE) = true AS is_vulnerable,
+    deb_cve.debsec_vulnerable,
+    cve_context.is_resolved,
     all_cve.data ->> 'published'::text AS cve_published_date,
-    CASE
-     WHEN (data->'metrics'->'cvssMetricV31'->0->'cvssData'->>'baseScore')::numeric IS NOT NULL THEN
-    (data->'metrics'->'cvssMetricV31'->0->'cvssData'->>'baseScore')::numeric
-     WHEN (data->'metrics'->'cvssMetricV30'->0->'cvssData'->>'baseScore')::numeric IS NOT NULL THEN
-    (data->'metrics'->'cvssMetricV30'->0->'cvssData'->>'baseScore')::numeric
-     WHEN (data->'metrics'->'cvssMetricV2'->0->'cvssData'->>'baseScore')::numeric IS NOT NULL THEN
-    (data->'metrics'->'cvssMetricV2'->0->'cvssData'->>'baseScore')::numeric
-     WHEN (data->'metrics'->'cvssMetricV40'->0->'cvssData'->>'baseScore')::numeric IS NOT NULL THEN
-    (data->'metrics'->'cvssMetricV40'->0->'cvssData'->>'baseScore')::numeric
-    END AS base_score,
-    CASE
-     WHEN (data->'metrics'->'cvssMetricV31'->0->'cvssData'->>'vectorString')::text IS NOT NULL THEN
-    (data->'metrics'->'cvssMetricV31'->0->'cvssData'->>'vectorString')::text
-     WHEN (data->'metrics'->'cvssMetricV30'->0->'cvssData'->>'vectorString')::text IS NOT NULL THEN
-    (data->'metrics'->'cvssMetricV30'->0->'cvssData'->>'vectorString')::text
-     WHEN (data->'metrics'->'cvssMetricV2'->0->'cvssData'->>'vectorString')::text IS NOT NULL THEN
-    (data->'metrics'->'cvssMetricV2'->0->'cvssData'->>'vectorString')::text
-     WHEN (data->'metrics'->'cvssMetricV40'->0->'cvssData'->>'vectorString')::text IS NOT NULL THEN
-    (data->'metrics'->'cvssMetricV40'->0->'cvssData'->>'vectorString')::text
-    END AS vector_string,
-    (data->'metrics'->'cvssMetricV40'->0->'cvssData'->>'baseScore')::numeric AS base_score_v40,
-    (data->'metrics'->'cvssMetricV31'->0->'cvssData'->>'baseScore')::numeric AS base_score_v31,
-    (data->'metrics'->'cvssMetricV30'->0->'cvssData'->>'baseScore')::numeric AS base_score_v30,
-    (data->'metrics'->'cvssMetricV2'->0->'cvssData'->>'baseScore')::numeric AS base_score_v2,
-    (data->'metrics'->'cvssMetricV40'->0->'cvssData'->>'vectorString')::text AS vector_string_v40,
-    (data->'metrics'->'cvssMetricV31'->0->'cvssData'->>'vectorString')::text AS vector_string_v31,
-    (data->'metrics'->'cvssMetricV30'->0->'cvssData'->>'vectorString')::text AS vector_string_v30,
-    (data->'metrics'->'cvssMetricV2'->0->'cvssData'->>'vectorString')::text AS vector_string_v2
+        CASE
+            WHEN ((((((all_cve.data -> 'metrics'::text) -> 'cvssMetricV31'::text) -> 0) -> 'cvssData'::text) ->> 'baseScore'::text)::numeric) IS NOT NULL THEN (((((all_cve.data -> 'metrics'::text) -> 'cvssMetricV31'::text) -> 0) -> 'cvssData'::text) ->> 'baseScore'::text)::numeric
+            WHEN ((((((all_cve.data -> 'metrics'::text) -> 'cvssMetricV30'::text) -> 0) -> 'cvssData'::text) ->> 'baseScore'::text)::numeric) IS NOT NULL THEN (((((all_cve.data -> 'metrics'::text) -> 'cvssMetricV30'::text) -> 0) -> 'cvssData'::text) ->> 'baseScore'::text)::numeric
+            WHEN ((((((all_cve.data -> 'metrics'::text) -> 'cvssMetricV2'::text) -> 0) -> 'cvssData'::text) ->> 'baseScore'::text)::numeric) IS NOT NULL THEN (((((all_cve.data -> 'metrics'::text) -> 'cvssMetricV2'::text) -> 0) -> 'cvssData'::text) ->> 'baseScore'::text)::numeric
+            WHEN ((((((all_cve.data -> 'metrics'::text) -> 'cvssMetricV40'::text) -> 0) -> 'cvssData'::text) ->> 'baseScore'::text)::numeric) IS NOT NULL THEN (((((all_cve.data -> 'metrics'::text) -> 'cvssMetricV40'::text) -> 0) -> 'cvssData'::text) ->> 'baseScore'::text)::numeric
+            ELSE NULL::numeric
+        END AS base_score,
+        CASE
+            WHEN (((((all_cve.data -> 'metrics'::text) -> 'cvssMetricV31'::text) -> 0) -> 'cvssData'::text) ->> 'vectorString'::text) IS NOT NULL THEN ((((all_cve.data -> 'metrics'::text) -> 'cvssMetricV31'::text) -> 0) -> 'cvssData'::text) ->> 'vectorString'::text
+            WHEN (((((all_cve.data -> 'metrics'::text) -> 'cvssMetricV30'::text) -> 0) -> 'cvssData'::text) ->> 'vectorString'::text) IS NOT NULL THEN ((((all_cve.data -> 'metrics'::text) -> 'cvssMetricV30'::text) -> 0) -> 'cvssData'::text) ->> 'vectorString'::text
+            WHEN (((((all_cve.data -> 'metrics'::text) -> 'cvssMetricV2'::text) -> 0) -> 'cvssData'::text) ->> 'vectorString'::text) IS NOT NULL THEN ((((all_cve.data -> 'metrics'::text) -> 'cvssMetricV2'::text) -> 0) -> 'cvssData'::text) ->> 'vectorString'::text
+            WHEN (((((all_cve.data -> 'metrics'::text) -> 'cvssMetricV40'::text) -> 0) -> 'cvssData'::text) ->> 'vectorString'::text) IS NOT NULL THEN ((((all_cve.data -> 'metrics'::text) -> 'cvssMetricV40'::text) -> 0) -> 'cvssData'::text) ->> 'vectorString'::text
+            ELSE NULL::text
+        END AS vector_string,
+    (((((all_cve.data -> 'metrics'::text) -> 'cvssMetricV40'::text) -> 0) -> 'cvssData'::text) ->> 'baseScore'::text)::numeric AS base_score_v40,
+    (((((all_cve.data -> 'metrics'::text) -> 'cvssMetricV31'::text) -> 0) -> 'cvssData'::text) ->> 'baseScore'::text)::numeric AS base_score_v31,
+    (((((all_cve.data -> 'metrics'::text) -> 'cvssMetricV30'::text) -> 0) -> 'cvssData'::text) ->> 'baseScore'::text)::numeric AS base_score_v30,
+    (((((all_cve.data -> 'metrics'::text) -> 'cvssMetricV2'::text) -> 0) -> 'cvssData'::text) ->> 'baseScore'::text)::numeric AS base_score_v2,
+    ((((all_cve.data -> 'metrics'::text) -> 'cvssMetricV40'::text) -> 0) -> 'cvssData'::text) ->> 'vectorString'::text AS vector_string_v40,
+    ((((all_cve.data -> 'metrics'::text) -> 'cvssMetricV31'::text) -> 0) -> 'cvssData'::text) ->> 'vectorString'::text AS vector_string_v31,
+    ((((all_cve.data -> 'metrics'::text) -> 'cvssMetricV30'::text) -> 0) -> 'cvssData'::text) ->> 'vectorString'::text AS vector_string_v30,
+    ((((all_cve.data -> 'metrics'::text) -> 'cvssMetricV2'::text) -> 0) -> 'cvssData'::text) ->> 'vectorString'::text AS vector_string_v2
    FROM all_cve
      JOIN deb_cve USING (cve_id)
      JOIN dist_cpe ON deb_cve.dist_id = dist_cpe.id
      FULL JOIN cve_context USING (cve_id, dist_id)
-  WHERE
-    dist_cpe.cpe_product = 'gardenlinux'::text AND
-    ((deb_cve.debsec_vulnerable AND NOT cve_context.is_resolved) = TRUE OR cve_context.is_resolved IS NULL);
+  WHERE dist_cpe.cpe_product = 'gardenlinux'::text AND deb_cve.debsec_vulnerable = true;
 
 ALTER TABLE public.sourcepackagecve
     OWNER TO glvd;
-
 
 -- View: public.recentsourcepackagecve
 
