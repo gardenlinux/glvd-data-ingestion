@@ -45,7 +45,7 @@ echo "Run data ingestion (nvd)"
 echo date before nvd
 date -u +%Y-%m-%dT%H:%M:%S%Z
 START_NVD=$(date +%s);
-glvd-data --debug ingest-nvd
+glvd-data ingest-nvd
 echo date after nvd
 date -u +%Y-%m-%dT%H:%M:%S%Z
 END_NVD=$(date +%s);
