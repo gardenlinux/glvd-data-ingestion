@@ -47,3 +47,9 @@ jobs:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Print image details
+      if: ${{ github.event_name != 'pull_request' }}
+      run: |
+        echo "Image pushed to ${{ steps.push-to-ghcr.outputs.registry-paths }}"
+        echo "Digest ${{ steps.push-to-ghcr.outputs.digest }}"
