@@ -3,8 +3,26 @@ on:
   workflow_dispatch:
 
 jobs:
+  download-previous-dump:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - run: |
+          LATEST_RUN_ID=$(gh run list --repo gardenlinux/glvd-data-ingestion --branch main --workflow 02-ingest-dump-snapshot.yaml --json databaseId --limit 1 | jq -r '.[0].databaseId')
+          gh run download $LATEST_RUN_ID -n glvd.sql --repo gardenlinux/glvd-data-ingestion
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: previous-glvd.sql
+          path: glvd.sql
+
   dump-db-snapshot:
     runs-on: ubuntu-latest
+    needs:
+      - download-previous-dump
     container: ghcr.io/gardenlinux/glvd-data-ingestion:latest
     env:
       PGUSER: glvd
@@ -36,11 +54,9 @@ jobs:
           echo "$PGHOST:$PGPORT:$PGDATABASE:$PGUSER:$PGPASSWORD" > ~/.pgpass
           chmod 0600 ~/.pgpass
 
-      - run: |
-          LATEST_RUN_ID=$(gh run list --repo gardenlinux/glvd-data-ingestion --branch main --workflow 02-ingest-dump-snapshot.yaml --json databaseId --limit 1 | jq -r '.[0].databaseId')
-          gh run download $LATEST_RUN_ID -n glvd.sql --repo gardenlinux/glvd-data-ingestion
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: previous-glvd.sql
 
       - run: psql glvd -f glvd.sql
 
