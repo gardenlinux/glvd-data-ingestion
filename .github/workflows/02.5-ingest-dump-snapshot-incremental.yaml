@@ -1,0 +1,74 @@
+name: 02.5 - Dump GLVD Postgres Snapshot to sql file (incremental)
+on:
+  workflow_dispatch:
+
+jobs:
+  dump-db-snapshot:
+    runs-on: ubuntu-latest
+    container: ghcr.io/gardenlinux/glvd-data-ingestion:latest
+    env:
+      PGUSER: glvd
+      PGDATABASE: glvd
+      PGPASSWORD: glvd
+      PGHOST: postgres
+      PGPORT: 5432
+
+    services:
+      postgres:
+        image: ghcr.io/gardenlinux/glvd-postgres:latest
+        env:
+          POSTGRES_USER: glvd
+          POSTGRES_DB: glvd
+          POSTGRES_PASSWORD: glvd
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - run: |
+          echo "$PGHOST:$PGPORT:$PGDATABASE:$PGUSER:$PGPASSWORD" > ~/.pgpass
+          chmod 0600 ~/.pgpass
+
+      - run: |
+          LATEST_RUN_ID=$(gh run list --repo gardenlinux/glvd-data-ingestion --branch main --workflow 02-ingest-dump-snapshot.yaml --json databaseId --limit 1 | jq -r '.[0].databaseId')
+          gh run download $LATEST_RUN_ID -n glvd.sql --repo gardenlinux/glvd-data-ingestion
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - run: psql glvd -f glvd.sql
+
+      - name: Ingest Data
+        run: /usr/local/src/ingest-postgres.sh
+
+      - run: psql glvd -f extra-schema.sql
+
+      - name: Add dummy ingestion data
+        run: |
+          psql -t -U glvd -c "INSERT INTO public.cve_context (dist_id, cve_id, context_descriptor, description, is_resolved) SELECT '14', nvd.cve_id, 'dummy', 'automated dummy data', TRUE FROM public.nvd_cve nvd;" glvd
+
+      - name: Dump Database Snapshot
+        run: |
+          pg_dump -h postgres -p 5432 -U glvd glvd > glvd.sql
+
+      - name: Dump Database Schema
+        run: |
+          pg_dump --schema-only -h postgres -p 5432 -U glvd glvd > glvd-schema.sql
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: glvd.sql
+          path: glvd.sql
+          retention-days: 2
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: glvd-schema.sql
+          path: glvd-schema.sql
+          retention-days: 2
