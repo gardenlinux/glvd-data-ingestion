@@ -63,12 +63,6 @@ jobs:
       - name: Ingest Data
         run: /usr/local/src/ingest-postgres.sh
 
-      - run: psql glvd -f extra-schema.sql
-
-      - name: Add dummy ingestion data
-        run: |
-          psql -t -U glvd -c "INSERT INTO public.cve_context (dist_id, cve_id, context_descriptor, description, is_resolved) SELECT '14', nvd.cve_id, 'dummy', 'automated dummy data', TRUE FROM public.nvd_cve nvd;" glvd
-
       - name: Dump Database Snapshot
         run: |
           pg_dump -h postgres -p 5432 -U glvd glvd > glvd.sql
