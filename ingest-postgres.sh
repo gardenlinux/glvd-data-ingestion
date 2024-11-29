@@ -3,6 +3,8 @@
 set -euo pipefail
 set -x
 
+START=$(date +%s)
+
 mkdir -p /usr/local/src/data/ingest-debsec/{debian,gardenlinux}/CVE
 mkdir -p /usr/local/src/data/ingest-debsec/debian/CVE
 mkdir -p /usr/local/src/data/ingest-debsrc/{debian,gardenlinux}
@@ -38,9 +40,24 @@ glvd-data ingest-debsec debian security-tracker/data
 echo "Run data ingestion (ingest-debsrc - gardenlinux today)"
 glvd-data ingest-debsrc gardenlinux today /usr/local/src/data/ingest-debsrc/gardenlinux/lists/packages.gardenlinux.io_gardenlinux_dists_today_main_source_Sources
 
+
 echo "Run data ingestion (nvd)"
+echo date before nvd
+date -u +%Y-%m-%dT%H:%M:%S%Z
+START_NVD=$(date +%s);
 glvd-data ingest-nvd
+echo date after nvd
+date -u +%Y-%m-%dT%H:%M:%S%Z
+END_NVD=$(date +%s);
+echo $((END_NVD-START_NVD)) | awk '{printf "Duration of nvd import: %d:%02d:%02d\n", $1/3600, ($1/60)%60, $1%60}'
+
+
 echo "Run data combination (combine-deb)"
 glvd-data combine-deb
 echo "Run data combination (combine-all)"
 glvd-data combine-all
+
+
+# taken from https://stackoverflow.com/a/20249534
+END=$(date +%s);
+echo $((END-START)) | awk '{printf "Duration of run: %d:%02d:%02d\n", $1/3600, ($1/60)%60, $1%60}'
