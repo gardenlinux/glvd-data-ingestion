@@ -31,21 +31,21 @@ git clone --depth=1 https://salsa.debian.org/security-tracker-team/security-trac
 find /usr/local/src/data -name '*source_Sources'
 
 echo "Run data ingestion (ingest-debsrc - debian trixie)"
-glvd-data ingest-debsrc debian trixie /usr/local/src/data/ingest-debsrc/debian/lists/deb.debian.org_debian_dists_trixie_main_source_Sources
+python3 -m glvd.cli.data.ingest_debsrc debian trixie /usr/local/src/data/ingest-debsrc/debian/lists/deb.debian.org_debian_dists_trixie_main_source_Sources
 echo "Run data ingestion (ingest-debsrc - debian bookworm)"
-glvd-data ingest-debsrc debian bookworm /usr/local/src/data/ingest-debsrc/debian/lists/deb.debian.org_debian_dists_bookworm_main_source_Sources
+python3 -m glvd.cli.data.ingest_debsrc debian bookworm /usr/local/src/data/ingest-debsrc/debian/lists/deb.debian.org_debian_dists_bookworm_main_source_Sources
 echo "Run data ingestion (ingest-debsec - debian)"
-glvd-data ingest-debsec debian security-tracker/data
+python3 -m glvd.cli.data.ingest_debsec debian security-tracker/data
 
 echo "Run data ingestion (ingest-debsrc - gardenlinux today)"
-glvd-data ingest-debsrc gardenlinux today /usr/local/src/data/ingest-debsrc/gardenlinux/lists/packages.gardenlinux.io_gardenlinux_dists_today_main_source_Sources
+python3 -m glvd.cli.data.ingest_debsrc gardenlinux today /usr/local/src/data/ingest-debsrc/gardenlinux/lists/packages.gardenlinux.io_gardenlinux_dists_today_main_source_Sources
 
 
 echo "Run data ingestion (nvd)"
 echo date before nvd
 date -u +%Y-%m-%dT%H:%M:%S%Z
 START_NVD=$(date +%s);
-glvd-data ingest-nvd
+python3 -m glvd.cli.data.ingest_nvd
 echo date after nvd
 date -u +%Y-%m-%dT%H:%M:%S%Z
 END_NVD=$(date +%s);
@@ -53,9 +53,9 @@ echo $((END_NVD-START_NVD)) | awk '{printf "Duration of nvd import: %d:%02d:%02d
 
 
 echo "Run data combination (combine-deb)"
-glvd-data combine-deb
+python3 -m glvd.cli.data.combine_deb
 echo "Run data combination (combine-all)"
-glvd-data combine-all
+python3 -m glvd.cli.data.combine_all
 
 
 # taken from https://stackoverflow.com/a/20249534
