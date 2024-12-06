@@ -12,7 +12,9 @@ RUN apt-get update \
 -o Dir::Etc::sourcelist="/usr/local/src/conf/ingest-debsrc/gardenlinux.sources" \
 -o Dir::State="/usr/local/src/data/ingest-debsrc/gardenlinux/"
 
-RUN find /usr/local/src/data/ingest-debsrc/gardenlinux/ -name packages.gardenlinux.io_gardenlinux_dists*source_Sources*
+WORKDIR /usr/local/src/data/ingest-debsrc/gardenlinux/lists/
+
+RUN find . -name "packages.gardenlinux.io_gardenlinux_dists*source_Sources*"
 
 ENTRYPOINT ["lz4", "-dc"]
-CMD ["/usr/local/src/data/ingest-debsrc/gardenlinux/lists/packages.gardenlinux.io_gardenlinux_dists_today_main_source_Sources.lz4"]
+CMD ["packages.gardenlinux.io_gardenlinux_dists_today_main_source_Sources.lz4"]
