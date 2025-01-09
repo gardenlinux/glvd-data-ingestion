@@ -44,6 +44,7 @@ jobs:
       - name: Add dummy ingestion data
         run: |
           psql -t -U glvd -c "INSERT INTO public.cve_context (dist_id, cve_id, context_descriptor, description, is_resolved) SELECT '14', nvd.cve_id, 'dummy', 'automated dummy data', TRUE FROM public.nvd_cve nvd;" glvd
+          psql -t -U glvd -c "INSERT INTO public.cve_context (dist_id, cve_id, context_descriptor, description, is_resolved) SELECT '15', nvd.cve_id, 'dummy', 'automated dummy data', TRUE FROM public.nvd_cve nvd;" glvd
 
       - name: Dump Database Snapshot
         run: |
