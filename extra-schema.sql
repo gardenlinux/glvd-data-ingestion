@@ -141,6 +141,8 @@ CREATE OR REPLACE VIEW public.cvedetails
  SELECT all_cve.cve_id AS cve_id,
     all_cve.data -> 'vulnStatus'::text AS vulnstatus,
     all_cve.data -> 'published'::text AS published,
+    all_cve.data -> 'lastModified'::text AS modified,
+    all_cve.last_mod AS ingested,
     array_agg(cve_context.description) AS cve_context_description,
     array_agg(dist_cpe.cpe_product) AS distro,
     array_agg(dist_cpe.cpe_version) AS distro_version,
