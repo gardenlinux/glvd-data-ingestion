@@ -1,4 +1,4 @@
-FROM ghcr.io/gardenlinux/gardenlinux:1592.3
+FROM ghcr.io/gardenlinux/gardenlinux:1592.4
 
 RUN apt-get update && apt-get install -y lz4
 

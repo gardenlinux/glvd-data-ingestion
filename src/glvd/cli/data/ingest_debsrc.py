@@ -85,7 +85,7 @@ class IngestDebsrc:
                 await session.delete(entry)
                 continue
 
-            # Update object in place. Only real changes will be commited
+            # Update object in place. Only real changes will be committed
             entry.merge(new_entry)
 
     async def import_insert(

@@ -65,7 +65,7 @@ class DistCpeMapperGardenlinux(DistCpeMapper):
     def __call__(self, codename: str) -> DistCpe:
         version: str = {
             '1592.4': '1592.4',
-            '1592': '1592.5',
+            '1592.5': '1592.5',
             'today': 'today',
             '': '',
         }[codename]

@@ -3,22 +3,30 @@
 set -e
 
 # Install Debian Keyring
-sudo apt update
-sudo apt install -y debian-archive-keyring
+apt-get update
+apt-get install -y debian-archive-keyring
 
-# Prepare: mount directories
-mkdir -p tmp/ingest-debsec/{debian,gardenlinux}/CVE
-mkdir -p tmp/ingest-debsrc/debian
-mkdir -p tmp/ingest-debsrc/var/lib/dpkg
-touch tmp/ingest-debsrc/var/lib/dpkg/status
-
-# Prepare: ingest-debsec
+mkdir -p /usr/local/src/data/ingest-debsec/{debian,gardenlinux}/CVE
+mkdir -p /usr/local/src/data/ingest-debsec/debian/CVE
+mkdir -p /usr/local/src/data/ingest-debsrc/{debian,gardenlinux}
+mkdir -p /usr/local/src/data/ingest-debsrc/var/lib/dpkg
+touch /usr/local/src/data/ingest-debsrc/var/lib/dpkg/status
 curl https://salsa.debian.org/security-tracker-team/security-tracker/-/raw/master/data/CVE/list?ref_type=heads \
-    --output tmp/ingest-debsec/debian/CVE/list
-cp -p data/CVE/list tmp/ingest-debsec/gardenlinux/CVE/list
+    --output /usr/local/src/data/ingest-debsec/debian/CVE/list
+mkdir -p /usr/local/src/conf/ingest-debsrc/
 
-# Prepare: ingest-debsrc
-APT_CONFIG=conf/ingest-debsrc/apt.conf apt update \
-  -o Dir="$PWD/tmp/ingest-debsrc/" \
-  -o Dir::Etc::sourcelist="$PWD/conf/ingest-debsrc/debian.sources" \
-  -o Dir::State="$PWD/tmp/ingest-debsrc/"
+export APT_CONFIG=/usr/local/src/conf/ingest-debsrc/apt.conf 
+
+apt-get update \
+-o Dir="/usr/local/src/data/ingest-debsrc/debian/" \
+-o Dir::Etc::sourcelist="/usr/local/src/conf/ingest-debsrc/debian.sources" \
+-o Dir::State="/usr/local/src/data/ingest-debsrc/debian/"
+
+apt-get update \
+-o Dir="/usr/local/src/data/ingest-debsrc/gardenlinux/" \
+-o Dir::Etc::sourcelist="/usr/local/src/conf/ingest-debsrc/gardenlinux.sources" \
+-o Dir::State="/usr/local/src/data/ingest-debsrc/gardenlinux/"
+
+git clone --depth=1 https://salsa.debian.org/security-tracker-team/security-tracker
+
+find /usr/local/src/data -name '*source_Sources'
