@@ -40,9 +40,13 @@ python3 -m glvd.cli.data.ingest_debsec debian security-tracker/data
 echo "Run data ingestion (ingest-debsrc - gardenlinux today)"
 python3 -m glvd.cli.data.ingest_debsrc gardenlinux today /usr/local/src/data/ingest-debsrc/gardenlinux/lists/packages.gardenlinux.io_gardenlinux_dists_today_main_source_Sources
 
-echo "Run data ingestion (ingest-debsrc - gardenlinux 1592)"
-python3 -m glvd.cli.data.ingest_debsrc gardenlinux 1592 /usr/local/src/data/ingest-debsrc/gardenlinux/lists/packages.gardenlinux.io_gardenlinux_dists_1592.4_main_source_Sources
+echo "Run data ingestion (ingest-debsrc - gardenlinux 1592.4)"
+python3 -m glvd.cli.data.ingest_debsrc gardenlinux 1592.4 /usr/local/src/data/ingest-debsrc/gardenlinux/lists/packages.gardenlinux.io_gardenlinux_dists_1592.4_main_source_Sources
 
+# Import with empty file as 1592.5 is not released yet -- not sure if there is an better option to do that
+EMPTY_FILE=$(mktemp)
+echo "Run data ingestion (ingest-debsrc - gardenlinux 1592.5)"
+python3 -m glvd.cli.data.ingest_debsrc gardenlinux 1592.5 "$EMPTY_FILE"
 
 echo "Run data ingestion (nvd)"
 echo date before nvd
