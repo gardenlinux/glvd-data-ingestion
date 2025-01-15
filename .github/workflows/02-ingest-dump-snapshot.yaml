@@ -54,6 +54,10 @@ jobs:
         run: |
           pg_dump --schema-only -h postgres -p 5432 -U glvd glvd > glvd-schema.sql
 
+      - name: Dump dist_cpe table
+        run: |
+          psql -U glvd --csv -c "select * from public.dist_cpe;" glvd > dist_cpe.csv
+
       - uses: actions/upload-artifact@v4
         with:
           name: glvd.sql
@@ -64,4 +68,10 @@ jobs:
         with:
           name: glvd-schema.sql
           path: glvd-schema.sql
+          retention-days: 7
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist_cpe.csv
+          path: dist_cpe.csv
           retention-days: 7
