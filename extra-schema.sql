@@ -167,3 +167,22 @@ CREATE OR REPLACE VIEW public.cvedetails
 
 ALTER TABLE public.cvedetails
     OWNER TO glvd;
+
+
+-- View: public.nvd_exclusive_cve
+
+-- DROP VIEW public.nvd_exclusive_cve;
+
+CREATE OR REPLACE VIEW public.nvd_exclusive_cve
+ AS
+ SELECT nvd_cve.cve_id
+   FROM nvd_cve
+     LEFT JOIN all_cve ON nvd_cve.cve_id = all_cve.cve_id
+  WHERE all_cve.cve_id IS NULL
+  ORDER BY nvd_cve.cve_id DESC
+ LIMIT 500;
+
+ALTER TABLE public.nvd_exclusive_cve
+    OWNER TO glvd;
+
+
