@@ -66,6 +66,7 @@ class DistCpeMapperGardenlinux(DistCpeMapper):
         version: str = {
             '1592.4': '1592.4',
             '1592.5': '1592.5',
+            '1592.6': '1592.6',
             'today': 'today',
             '': '',
         }[codename]
