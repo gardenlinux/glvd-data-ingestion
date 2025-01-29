@@ -1,0 +1,53 @@
+name: 03.5 - Build and Push Container to init GLVD Postgres DB (Incremental)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  # Checkout repository
+  contents: read
+  # Push container images
+  packages: write
+
+jobs:
+  push-init-container:
+    runs-on: ubuntu-24.04
+    env:
+      IMAGE_NAME: gardenlinux/glvd-init
+      IMAGE_TAG: latest
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+    - name: Install qemu dependency for multi-arch build
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y qemu-user-static
+    - run: |
+        LATEST_RUN_ID=$(gh run list --repo gardenlinux/glvd-data-ingestion --status success --branch main --workflow 02.5-ingest-dump-snapshot-incremental.yaml --json databaseId --limit 1 | jq -r '.[0].databaseId')
+        gh run download $LATEST_RUN_ID -n glvd.sql --repo gardenlinux/glvd-data-ingestion
+      env:
+        GH_TOKEN: ${{ github.token }}
+    - name: Build Image
+      id: build_image
+      uses: redhat-actions/buildah-build@v2
+      with:
+        image: ${{ env.IMAGE_NAME }}
+        tags: ${{ env.IMAGE_TAG }}
+        platforms: linux/amd64, linux/arm64
+        containerfiles: |
+          ./Containerfile.pg-init
+
+    - name: Push To ghcr.io
+      id: push-to-ghcr
+      if: ${{ github.event_name != 'pull_request' }}
+      uses: redhat-actions/push-to-registry@v2
+      with:
+        image: ${{ steps.build_image.outputs.image }}
+        tags: ${{ steps.build_image.outputs.tags }}
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Print image digest
+      if: ${{ github.event_name != 'pull_request' }}
+      run: echo "Image pushed to ${{ steps.push-to-ghcr.outputs.digest }}"
