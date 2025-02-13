@@ -12,6 +12,9 @@ from typing import (
 from sqlalchemy import (
     ForeignKey,
     Index,
+    Column,
+    Boolean,
+    JSONB,
 )
 from sqlalchemy.orm import (
     DeclarativeBase,
@@ -136,3 +139,13 @@ class AllCve(Base):
 
     def merge(self, other: Self) -> None:
         self.data = other.data
+
+class CveContextKernel(Base):
+    __tablename__ = 'cve_context_kernel'
+
+    cve_id = Column(Text, primary_key=True, nullable=False)
+    lts_version = Column(Text, primary_key=True, nullable=False)
+    fixed_version = Column(Text)
+    is_fixed = Column(Boolean, nullable=False)
+    is_relevant_module = Column(Boolean, nullable=False)
+    source_data = Column(JSONB, nullable=False)

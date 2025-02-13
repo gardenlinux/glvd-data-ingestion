@@ -19,6 +19,21 @@ ALTER TABLE public.cve_context OWNER TO glvd;
 ALTER TABLE ONLY public.cve_context
     ADD CONSTRAINT cve_context_pkey PRIMARY KEY (dist_id, cve_id, create_date, context_descriptor);
 
+-- wip should be created via sqlalchemy
+-- --
+-- -- Name: cve_context_kernel; Type: TABLE; Schema: public; Owner: glvd
+-- --
+
+-- CREATE TABLE public.cve_context_kernel (
+--     cve_id text NOT NULL,
+--     lts_version text NOT NULL,
+--     fixed_version text,
+--     is_fixed boolean NOT NULL,
+--     is_relevant_module boolean NOT NULL,
+--     source_data jsonb NOT NULL
+-- );
+
+-- ALTER TABLE public.cve_context_kernel OWNER TO glvd;
 
 -- View: public.cve_with_context
 
