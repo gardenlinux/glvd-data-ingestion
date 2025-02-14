@@ -8,7 +8,7 @@ import logging
 import os
 from pathlib import Path
 
-from sqlalchemy import select, insert
+from sqlalchemy.dialects.postgresql import insert
 
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
@@ -24,9 +24,10 @@ from . import cli
 logger = logging.getLogger(__name__)
 
 
-# LTS kernel versions to check
+# LTS kernel versions to check.
+# This needs to be updated once we support a new kernel version, or drop support for one.
+# fixme(fwilhe): Get rid of the need for manual maintenance.
 lts_versions = ["6.6", "6.12"]
-
 
 # List of irrelevant kernel submodules in the context of Garden Linux.
 # We still record CVEs related to those submodules, but we'll focus less on them.
@@ -38,18 +39,17 @@ irrelevant_submodules = [
     "jfs", "misdn", "padata", "pds_core", "parisc", "loongarch"
 ]
 
+def compare_versions(v1: str, v2: str) -> int:
+    v1_parts = list(map(int, v1.split(".")))
+    v2_parts = list(map(int, v2.split(".")))
 
-def compare_versions(v1, v2):
-    v1_parts = list(map(int, v1.split('.')))
-    v2_parts = list(map(int, v2.split('.')))
-    
     # Compare each part of the version
     for v1_part, v2_part in zip(v1_parts, v2_parts):
         if v1_part < v2_part:
             return -1
         elif v1_part > v2_part:
             return 1
-    
+
     # If all parts are equal, compare the length of the version parts
     if len(v1_parts) < len(v2_parts):
         return -1
@@ -57,48 +57,57 @@ def compare_versions(v1, v2):
         return 1
     return 0
 
-def is_relevant_module(program_files):
+
+def is_relevant_module(program_files: list[str]) -> bool:
     for file in program_files:
         for submodule in irrelevant_submodules:
             if submodule in file:
                 return False
     return True
 
-def get_fixed_versions(lts_versions, cve_data):
-    fixed_versions = {lts: None for lts in lts_versions}
-    
-    for entry in cve_data['containers']['cna']['affected']:
-        if 'versions' not in entry:
+
+def get_fixed_versions(lts_versions: list[str], cve_data: dict) -> dict[str, str | None]:
+    fixed_versions = dict.fromkeys(lts_versions, None)
+
+    for entry in cve_data["containers"]["cna"]["affected"]:
+        if "versions" not in entry:
             logging.debug(f"No 'versions' key in entry: {entry}")
             continue
-        
-        for ver in entry['versions']:
-            if ver['status'] == 'unaffected':
+
+        for ver in entry["versions"]:
+            version: str = ver["version"]
+            if ver["status"] == "unaffected":
                 for lts in lts_versions:
-                    if ver['version'].startswith(lts):
-                        if fixed_versions[lts] is None or compare_versions(ver['version'], fixed_versions[lts]) < 0:
-                            version: str = ver['version']
-                            logging.debug(f"Updating fixed version for {lts}: {fixed_versions[lts]} -> {version}")
+                    if version.startswith(lts):
+                        if (
+                            fixed_versions[lts] is None
+                            or compare_versions(version, fixed_versions[lts]) < 0
+                        ):
+                            logging.debug(
+                                f"Updating fixed version for {lts}: {fixed_versions[lts]} -> {version}"
+                            )
                             fixed_versions[lts] = version
                         else:
-                            logging.debug(f"Skipping version {ver['version']} for {lts} as it is not earlier than {fixed_versions[lts]}")
+                            logging.debug(
+                                f"Skipping version {version} for {lts} as it is not earlier than {fixed_versions[lts]}"
+                            )
             else:
-                logging.debug(f"Version {ver['version']} is affected, skipping")
+                logging.debug(f"Version {version} is affected, skipping")
     return fixed_versions
 
 
 class IngestKernel:
     @staticmethod
     @cli.register(
-        'ingest-kernel',
+        "ingest-kernel",
         arguments=[
             cli.prepare_argument(
-                'dir',
-                help='data directory out of https://git.kernel.org/pub/scm/linux/security/vulns.git',
-                metavar='KERNEL_VULNS',
+                "dir",
+                help="data directory out of https://git.kernel.org/pub/scm/linux/security/vulns.git",
+                metavar="KERNEL_VULNS",
                 type=Path,
             ),
-        ]
+        ],
     )
     def run(*, argparser: None, dir: Path, database: str, debug: bool) -> None:
         logging.basicConfig(level=debug and logging.DEBUG or logging.INFO)
@@ -110,7 +119,7 @@ class IngestKernel:
 
     def iterate_kernel_cve_json_files(self) -> list[Path]:
         cve_files = []
-        for file_path in self.path.glob('**/*.json'):
+        for file_path in self.path.glob("**/*.json"):
             if file_path.is_file():
                 cve_files.append(file_path)
         return cve_files
@@ -121,36 +130,51 @@ class IngestKernel:
         session: AsyncSession,
     ) -> None:
         logging.debug(f"Processing file: {filepath}")
-            
-        contents = ''
-        # Load JSON data from file
-        with open(filepath, 'r') as file:
+
+        # Save the file contents to put it into the db.
+        # As of now, we don't have a need for this, but it might be useful later.
+        contents = ""
+        with open(filepath, "r") as file:
             cve_data = json.load(file)
             contents = json.dumps(cve_data)
-        
-        # Determine if the CVE affects a relevant module
+
+        # Determine if the CVE affects a relevant module in the context of Garden Linux
         program_files = []
-        for entry in cve_data['containers']['cna']['affected']:
-            program_files.extend(entry.get('programFiles', []))
+        for entry in cve_data["containers"]["cna"]["affected"]:
+            program_files.extend(entry.get("programFiles", []))
         relevant_module = is_relevant_module(program_files)
-        
+
         # Get fixed versions for the specified LTS kernels
         fixed_versions = get_fixed_versions(lts_versions, cve_data)
-        
 
         # Insert the results into the database
-        cve_id = os.path.basename(filepath).replace('.json', '')
+        cve_id = os.path.basename(filepath).replace(".json", "")
+
+        logger.info(f"{cve_id} is fixed in {fixed_versions}")
+
         for lts, version in fixed_versions.items():
             is_fixed = version is not None
-            
-            await session.execute(insert(CveContextKernel).values(
-                cve_id=cve_id,
-                lts_version=lts,
-                fixed_version=version,
-                is_fixed=is_fixed,
-                is_relevant_module=relevant_module,
-                source_data=contents,
-            ))
+
+            await session.execute(
+                insert(CveContextKernel)
+                .values(
+                    cve_id=cve_id,
+                    lts_version=lts,
+                    fixed_version=version,
+                    is_fixed=is_fixed,
+                    is_relevant_module=relevant_module,
+                    source_data=contents,
+                )
+                .on_conflict_do_update(
+                    index_elements=['cve_id', 'lts_version'],
+                    set_={
+                        'fixed_version': version,
+                        'is_fixed': is_fixed,
+                        'is_relevant_module': relevant_module,
+                        'source_data': contents,
+                    }
+                )
+            )
 
     async def __call__(
         self,
@@ -161,11 +185,11 @@ class IngestKernel:
 
         async with async_sessionmaker(engine)() as session:
             files = self.iterate_kernel_cve_json_files()
-            
-            for f in files:        
+
+            for f in files:
                 await self.import_file(f, session)
             await session.commit()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     IngestKernel.run()
