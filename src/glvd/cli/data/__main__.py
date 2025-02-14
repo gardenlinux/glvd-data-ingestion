@@ -11,6 +11,7 @@ from . import (  # noqa: F401
     ingest_debsec,
     ingest_debsrc,
     ingest_nvd,
+    ingest_kernel,
 )
 
 

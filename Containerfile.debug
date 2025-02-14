@@ -1,5 +1,17 @@
 FROM docker.io/library/debian:trixie-slim
 
+# Sample command to run inside the container:
+#   python3 -m glvd.cli.data
+#   python3 -m glvd.cli.data.ingest_kernel /vulns/cve/published/ --debug
+
+ENV PGUSER=glvd
+ENV PGDATABASE=glvd
+ENV PGPASSWORD=glvd
+ENV PGPORT=5432
+
+# You might want to override this variable depending on the hostname of your postgres container
+ENV PGHOST=glvd-postgres
+
 # XXX: Debian unstable required for python3-sqlalchemy (>= 2)
 RUN sed -i -e 's/Suites: trixie trixie-updates/\0 unstable/' /etc/apt/sources.list.d/debian.sources
 RUN apt-get update && \

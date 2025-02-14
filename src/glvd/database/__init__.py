@@ -14,7 +14,6 @@ from sqlalchemy import (
     Index,
     Column,
     Boolean,
-    JSONB,
 )
 from sqlalchemy.orm import (
     DeclarativeBase,
@@ -29,6 +28,8 @@ from sqlalchemy.types import (
     JSON,
     Text,
 )
+
+from sqlalchemy.dialects.postgresql import JSONB
 
 from ..data.cvss import CvssSeverity
 from .types import (
