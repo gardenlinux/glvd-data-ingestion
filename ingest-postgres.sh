@@ -27,6 +27,7 @@ apt-get update \
 -o Dir::State="/usr/local/src/data/ingest-debsrc/gardenlinux/"
 
 git clone --depth=1 https://salsa.debian.org/security-tracker-team/security-tracker
+git clone --depth=1 https://git.kernel.org/pub/scm/linux/security/vulns.git
 
 find /usr/local/src/data -name '*source_Sources'
 
@@ -67,6 +68,8 @@ python3 -m glvd.cli.data.combine_deb
 echo "Run data combination (combine-all)"
 python3 -m glvd.cli.data.combine_all
 
+echo "Run kernel CVE ingestion"
+python3 -m glvd.cli.data.ingest_kernel vulns/cve/published/
 
 # taken from https://stackoverflow.com/a/20249534
 END=$(date +%s);
