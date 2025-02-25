@@ -5,6 +5,13 @@ set -x
 
 START=$(date +%s)
 
+GL_VERSIONS_WITH_SOURCE_REPO=$(curl https://gardenlinux-glrd.s3.eu-central-1.amazonaws.com/releases-patch.json |  jq --join-output '.releases[] | select(.attributes.source_repo==true) | "\(.version.major).\(.version.minor) "')
+export GL_VERSIONS_WITH_SOURCE_REPO
+
+echo Supporting Garden Linux versions "$GL_VERSIONS_WITH_SOURCE_REPO"
+
+envsubst < /usr/local/src/conf/ingest-debsrc/gardenlinux.sources.template > /usr/local/src/conf/ingest-debsrc/gardenlinux.sources
+
 mkdir -p /usr/local/src/data/ingest-debsec/{debian,gardenlinux}/CVE
 mkdir -p /usr/local/src/data/ingest-debsec/debian/CVE
 mkdir -p /usr/local/src/data/ingest-debsrc/{debian,gardenlinux}
@@ -41,16 +48,19 @@ python3 -m glvd.cli.data.ingest_debsec debian security-tracker/data
 echo "Run data ingestion (ingest-debsrc - gardenlinux today)"
 python3 -m glvd.cli.data.ingest_debsrc gardenlinux today /usr/local/src/data/ingest-debsrc/gardenlinux/lists/packages.gardenlinux.io_gardenlinux_dists_today_main_source_Sources
 
-echo "Run data ingestion (ingest-debsrc - gardenlinux 1592.4)"
-python3 -m glvd.cli.data.ingest_debsrc gardenlinux 1592.4 /usr/local/src/data/ingest-debsrc/gardenlinux/lists/packages.gardenlinux.io_gardenlinux_dists_1592.4_main_source_Sources
+for version in $GL_VERSIONS_WITH_SOURCE_REPO; do
+    echo "Run data ingestion (ingest-debsrc - gardenlinux $version)"
+    python3 -m glvd.cli.data.ingest_debsrc gardenlinux "$version" "/usr/local/src/data/ingest-debsrc/gardenlinux/lists/packages.gardenlinux.io_gardenlinux_dists_${version}_main_source_Sources"
+done
 
-echo "Run data ingestion (ingest-debsrc - gardenlinux 1592.5)"
-python3 -m glvd.cli.data.ingest_debsrc gardenlinux 1592.5  /usr/local/src/data/ingest-debsrc/gardenlinux/lists/packages.gardenlinux.io_gardenlinux_dists_1592.5_main_source_Sources
+UNRELEASED_PATCH_VERSIONS=$(python3 /usr/local/src/unreleased-patch-versions.py "$GL_VERSIONS_WITH_SOURCE_REPO")
 
-# Import with empty file as 1592.6 is not released yet -- not sure if there is an better option to do that
-EMPTY_FILE=$(mktemp)
-echo "Run data ingestion (ingest-debsrc - gardenlinux 1592.6)"
-python3 -m glvd.cli.data.ingest_debsrc gardenlinux 1592.6 "$EMPTY_FILE"
+for unreleased in $UNRELEASED_PATCH_VERSIONS; do
+    # Import with empty file for unreleased versions, this allows us to add cve context for those versions
+    EMPTY_FILE=$(mktemp)
+    echo "Run data ingestion (ingest-debsrc - gardenlinux $unreleased)"
+    python3 -m glvd.cli.data.ingest_debsrc gardenlinux "$unreleased" "$EMPTY_FILE"
+done
 
 echo "Run data ingestion (nvd)"
 echo date before nvd
