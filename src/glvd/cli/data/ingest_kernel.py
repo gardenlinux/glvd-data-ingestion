@@ -31,7 +31,7 @@ lts_versions = ["6.6", "6.12"]
 
 # List of irrelevant kernel submodules in the context of Garden Linux.
 # We still record CVEs related to those submodules, but we'll focus less on them.
-irrelevant_submodules = [
+irrelevant_subsystems = [
     "afs", "xen", "x86/hyperv", "wifi", "video/", "staging", "drm", "can", "Bluetooth", "mmc", "nfc", "thunderbolt",
     "s390", "riscv", "powerpc", "nouveau", "media", "leds", "usb", "MIPS", "nilfs2", "ubifs", "ocfs2", "spi", "i3c",
     "um", "udf", "atm", "eventfs", "fs/9p", "gtp", "hid", "i2c", "ice", "hwmon", "mailbox", "misc", "f2fs", "libfs",
@@ -58,9 +58,9 @@ def compare_versions(v1: str, v2: str) -> int:
     return 0
 
 
-def is_relevant_module(program_files: list[str]) -> bool:
+def is_relevant_subsystem(program_files: list[str]) -> bool:
     for file in program_files:
-        for submodule in irrelevant_submodules:
+        for submodule in irrelevant_subsystems:
             if submodule in file:
                 return False
     return True
@@ -142,7 +142,7 @@ class IngestKernel:
         program_files = []
         for entry in cve_data["containers"]["cna"]["affected"]:
             program_files.extend(entry.get("programFiles", []))
-        relevant_module = is_relevant_module(program_files)
+        relevant_subsystem = is_relevant_subsystem(program_files)
 
         # Get fixed versions for the specified LTS kernels
         fixed_versions = get_fixed_versions(lts_versions, cve_data)
@@ -162,7 +162,7 @@ class IngestKernel:
                     lts_version=lts,
                     fixed_version=version,
                     is_fixed=is_fixed,
-                    is_relevant_module=relevant_module,
+                    is_relevant_subsystem=relevant_subsystem,
                     source_data=contents,
                 )
                 .on_conflict_do_update(
@@ -170,7 +170,7 @@ class IngestKernel:
                     set_={
                         'fixed_version': version,
                         'is_fixed': is_fixed,
-                        'is_relevant_module': relevant_module,
+                        'is_relevant_subsystem': relevant_subsystem,
                         'source_data': contents,
                     }
                 )
