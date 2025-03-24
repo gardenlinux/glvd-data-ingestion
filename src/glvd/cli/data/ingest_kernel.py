@@ -29,8 +29,8 @@ logger = logging.getLogger(__name__)
 # fixme(fwilhe): Get rid of the need for manual maintenance.
 lts_versions = ["6.6", "6.12"]
 
-# List of irrelevant kernel submodules in the context of Garden Linux.
-# We still record CVEs related to those submodules, but we'll focus less on them.
+# List of irrelevant kernel subsystems in the context of Garden Linux.
+# We still record CVEs related to those subsystems, but we'll focus less on them.
 irrelevant_subsystems = [
     "afs", "xen", "x86/hyperv", "wifi", "video/", "staging", "drm", "can", "Bluetooth", "mmc", "nfc", "thunderbolt",
     "s390", "riscv", "powerpc", "nouveau", "media", "leds", "usb", "MIPS", "nilfs2", "ubifs", "ocfs2", "spi", "i3c",
