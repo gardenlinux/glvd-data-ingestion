@@ -131,43 +131,6 @@ CREATE OR REPLACE VIEW public.sourcepackage
 ALTER TABLE public.sourcepackage
     OWNER TO glvd;
 
--- View: public.cvedetails
-
--- DROP VIEW public.cvedetails;
-
-CREATE OR REPLACE VIEW public.cvedetails
- AS
- SELECT nvd_cve.cve_id AS cve_id,
-    nvd_cve.data -> 'vulnStatus'::text AS vulnstatus,
-    nvd_cve.data -> 'published'::text AS published,
-    nvd_cve.data -> 'lastModified'::text AS modified,
-    nvd_cve.last_mod AS ingested,
-    array_agg(cve_context.description) AS cve_context_description,
-    array_agg(dist_cpe.cpe_product) AS distro,
-    array_agg(dist_cpe.cpe_version) AS distro_version,
-    array_agg(deb_cve.debsec_vulnerable) AS is_vulnerable,
-    array_agg(deb_cve.deb_source) AS source_package_name,
-    array_agg(deb_cve.deb_version::text) AS source_package_version,
-    array_agg(deb_cve.deb_version_fixed::text) AS version_fixed,
-    ((nvd_cve.data -> 'descriptions'::text) -> 0) -> 'value'::text AS description,
-    (((((nvd_cve.data -> 'metrics'::text) -> 'cvssMetricV40'::text) -> 0) -> 'cvssData'::text) ->> 'baseScore'::text)::numeric AS base_score_v40,
-    (((((nvd_cve.data -> 'metrics'::text) -> 'cvssMetricV31'::text) -> 0) -> 'cvssData'::text) ->> 'baseScore'::text)::numeric AS base_score_v31,
-    (((((nvd_cve.data -> 'metrics'::text) -> 'cvssMetricV30'::text) -> 0) -> 'cvssData'::text) ->> 'baseScore'::text)::numeric AS base_score_v30,
-    (((((nvd_cve.data -> 'metrics'::text) -> 'cvssMetricV2'::text) -> 0) -> 'cvssData'::text) ->> 'baseScore'::text)::numeric AS base_score_v2,
-    ((((nvd_cve.data -> 'metrics'::text) -> 'cvssMetricV40'::text) -> 0) -> 'cvssData'::text) ->> 'vectorString'::text AS vector_string_v40,
-    ((((nvd_cve.data -> 'metrics'::text) -> 'cvssMetricV31'::text) -> 0) -> 'cvssData'::text) ->> 'vectorString'::text AS vector_string_v31,
-    ((((nvd_cve.data -> 'metrics'::text) -> 'cvssMetricV30'::text) -> 0) -> 'cvssData'::text) ->> 'vectorString'::text AS vector_string_v30,
-    ((((nvd_cve.data -> 'metrics'::text) -> 'cvssMetricV2'::text) -> 0) -> 'cvssData'::text) ->> 'vectorString'::text AS vector_string_v2
-   FROM nvd_cve
-     JOIN deb_cve USING (cve_id)
-     JOIN dist_cpe ON deb_cve.dist_id = dist_cpe.id
-     FULL JOIN cve_context USING (cve_id, dist_id)
-  GROUP BY nvd_cve.cve_id;
-
-ALTER TABLE public.cvedetails
-    OWNER TO glvd;
-
-
 -- View: public.nvd_exclusive_cve
 
 -- DROP VIEW public.nvd_exclusive_cve;
@@ -243,6 +206,7 @@ CREATE OR REPLACE VIEW public.kernel_cve
     k.source_package_version,
     k.gardenlinux_version,
     k.is_vulnerable,
+    k.fixed_version,
     nvd.data ->> 'published'::text AS cve_published_date,
     nvd.data ->> 'lastModified'::text AS cve_last_modified_date,
     nvd.last_mod AS cve_last_ingested_date,
@@ -275,3 +239,29 @@ ALTER TABLE public.kernel_cve
     OWNER TO glvd;
 
 
+CREATE OR REPLACE VIEW public.combined_cve AS
+SELECT
+    COALESCE(kc.cve_id, spc.cve_id) AS cve_id,
+    COALESCE(kc.source_package_name, spc.source_package_name) AS source_package_name,
+    COALESCE(kc.source_package_version, spc.source_package_version) AS source_package_version,
+    COALESCE(kc.gardenlinux_version, spc.gardenlinux_version) AS gardenlinux_version,
+    COALESCE(kc.is_vulnerable, spc.is_vulnerable) AS is_vulnerable,
+    COALESCE(kc.cve_published_date, spc.cve_published_date) AS cve_published_date,
+    COALESCE(kc.cve_last_modified_date, spc.cve_last_modified_date) AS cve_last_modified_date,
+    COALESCE(kc.cve_last_ingested_date, spc.cve_last_ingested_date) AS cve_last_ingested_date,
+    COALESCE(kc.base_score, spc.base_score) AS base_score,
+    COALESCE(kc.vector_string, spc.vector_string) AS vector_string,
+    COALESCE(kc.base_score_v40, spc.base_score_v40) AS base_score_v40,
+    COALESCE(kc.base_score_v31, spc.base_score_v31) AS base_score_v31,
+    COALESCE(kc.base_score_v30, spc.base_score_v30) AS base_score_v30,
+    COALESCE(kc.base_score_v2, spc.base_score_v2) AS base_score_v2,
+    COALESCE(kc.vector_string_v40, spc.vector_string_v40) AS vector_string_v40,
+    COALESCE(kc.vector_string_v31, spc.vector_string_v31) AS vector_string_v31,
+    COALESCE(kc.vector_string_v30, spc.vector_string_v30) AS vector_string_v30,
+    COALESCE(kc.vector_string_v2, spc.vector_string_v2) AS vector_string_v2
+FROM
+    public.kernel_cve kc
+FULL JOIN
+    public.sourcepackagecve spc
+ON
+    kc.cve_id = spc.cve_id;
