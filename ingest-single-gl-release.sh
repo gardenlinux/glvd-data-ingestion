@@ -20,5 +20,18 @@ echo Ingesting packages for Garden Linux "$GL_VERSIONS_WITH_SOURCE_REPO"
 
 envsubst < /usr/local/src/conf/ingest-debsrc/gardenlinux.sources.template > /usr/local/src/conf/ingest-debsrc/gardenlinux.sources
 
+mkdir -p /usr/local/src/data/ingest-debsec/{debian,gardenlinux}/CVE
+mkdir -p /usr/local/src/data/ingest-debsec/debian/CVE
+mkdir -p /usr/local/src/data/ingest-debsrc/{debian,gardenlinux}
+mkdir -p /usr/local/src/data/ingest-debsrc/var/lib/dpkg
+touch /usr/local/src/data/ingest-debsrc/var/lib/dpkg/status
+
+
+apt-get update \
+-o Dir="/usr/local/src/data/ingest-debsrc/gardenlinux/" \
+-o Dir::Etc::sourcelist="/usr/local/src/conf/ingest-debsrc/gardenlinux.sources" \
+-o Dir::State="/usr/local/src/data/ingest-debsrc/gardenlinux/"
+
+
 echo "Run data ingestion (ingest-debsrc - gardenlinux $GL_VERSIONS_WITH_SOURCE_REPO)"
 python3 -m glvd.cli.data.ingest_debsrc gardenlinux "$GL_VERSIONS_WITH_SOURCE_REPO" "/usr/local/src/data/ingest-debsrc/gardenlinux/lists/packages.gardenlinux.io_gardenlinux_dists_${GL_VERSIONS_WITH_SOURCE_REPO}_main_source_Sources"
