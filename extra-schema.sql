@@ -300,11 +300,11 @@ CREATE OR REPLACE VIEW public.cvedetails
     COALESCE(kc.vector_string_v30, ((((nvd_cve.data -> 'metrics'::text) -> 'cvssMetricV30'::text) -> 0) -> 'cvssData'::text) ->> 'vectorString'::text) AS vector_string_v30,
     COALESCE(kc.vector_string_v2, ((((nvd_cve.data -> 'metrics'::text) -> 'cvssMetricV2'::text) -> 0) -> 'cvssData'::text) ->> 'vectorString'::text) AS vector_string_v2
    FROM nvd_cve
-     JOIN deb_cve USING (cve_id)
+     JOIN deb_cve on deb_cve.cve_id = nvd_cve.cve_id and deb_cve.deb_source <> 'linux'
      JOIN dist_cpe ON deb_cve.dist_id = dist_cpe.id
      FULL JOIN cve_context USING (cve_id, dist_id)
-     LEFT JOIN kernel_cve kc ON kc.cve_id = nvd_cve.cve_id AND kc.source_package_name = 'linux' and kc.source_package_version like '6.6.%'
-  GROUP BY nvd_cve.cve_id, kc.base_score_v40, kc.base_score_v31, kc.base_score_v30, kc.base_score_v2, kc.vector_string_v40, kc.vector_string_v31, kc.vector_string_v30, kc.vector_string_v2;
+     FULL JOIN kernel_cve kc ON kc.cve_id = nvd_cve.cve_id AND kc.source_package_name = 'linux'
+  GROUP BY nvd_cve.cve_id, kc.cve_id, kc.base_score_v40, kc.base_score_v31, kc.base_score_v30, kc.base_score_v2, kc.vector_string_v40, kc.vector_string_v31, kc.vector_string_v30, kc.vector_string_v2;
 
 ALTER TABLE public.cvedetails
     OWNER TO glvd;
