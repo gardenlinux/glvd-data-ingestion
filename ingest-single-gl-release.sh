@@ -5,33 +5,31 @@ set -x
 
 # Workaround to import a new Garden Linux release that is not yet part of the GLRD, but already has the apt repo available
 
-# Assert that GL_VERSIONS_WITH_SOURCE_REPO is non-empty and contains a single version number in the form of 123.3
-if [[ -z "$GL_VERSIONS_WITH_SOURCE_REPO" ]]; then
-    echo "Error: GL_VERSIONS_WITH_SOURCE_REPO is empty"
+# Check if $1 is provided and matches the pattern 123.3
+if [[ $# -lt 1 ]]; then
+    echo "Error: Missing argument. Please provide a version number in the form of 123.3."
     exit 1
 fi
 
-if ! [[ "$GL_VERSIONS_WITH_SOURCE_REPO" =~ ^[0-9]+\.[0-9]+$ ]]; then
-    echo "Error: GL_VERSIONS_WITH_SOURCE_REPO does not contain a single version number in the form of 123.3"
+if ! [[ "$1" =~ ^[0-9]+\.[0-9]+$ ]]; then
+    echo "Error: Argument does not match the required version pattern (e.g., 123.3)."
     exit 1
 fi
 
-echo Ingesting packages for Garden Linux "$GL_VERSIONS_WITH_SOURCE_REPO"
+pushd $(mktemp -d)
 
-envsubst < /usr/local/src/conf/ingest-debsrc/gardenlinux.sources.template > /usr/local/src/conf/ingest-debsrc/gardenlinux.sources
+GARDENLINUX_VERSION="$1"
 
-mkdir -p /usr/local/src/data/ingest-debsec/{debian,gardenlinux}/CVE
-mkdir -p /usr/local/src/data/ingest-debsec/debian/CVE
-mkdir -p /usr/local/src/data/ingest-debsrc/{debian,gardenlinux}
-mkdir -p /usr/local/src/data/ingest-debsrc/var/lib/dpkg
-touch /usr/local/src/data/ingest-debsrc/var/lib/dpkg/status
+wcurl https://packages.gardenlinux.io/gardenlinux/dists/"$GARDENLINUX_VERSION"/main/source/Sources.gz
+gunzip Sources.gz
 
 
-apt-get update \
--o Dir="/usr/local/src/data/ingest-debsrc/gardenlinux/" \
--o Dir::Etc::sourcelist="/usr/local/src/conf/ingest-debsrc/gardenlinux.sources" \
--o Dir::State="/usr/local/src/data/ingest-debsrc/gardenlinux/"
+echo "Run data ingestion (ingest-debsrc - gardenlinux $GARDENLINUX_VERSION)"
+python3 -m glvd.cli.data.ingest_debsrc gardenlinux "$GARDENLINUX_VERSION" "$PWD"/Sources
 
+echo "Run data combination (combine-deb)"
+python3 -m glvd.cli.data.combine_deb
+echo "Run data combination (combine-all)"
+python3 -m glvd.cli.data.combine_all
 
-echo "Run data ingestion (ingest-debsrc - gardenlinux $GL_VERSIONS_WITH_SOURCE_REPO)"
-python3 -m glvd.cli.data.ingest_debsrc gardenlinux "$GL_VERSIONS_WITH_SOURCE_REPO" "/usr/local/src/data/ingest-debsrc/gardenlinux/lists/packages.gardenlinux.io_gardenlinux_dists_${GL_VERSIONS_WITH_SOURCE_REPO}_main_source_Sources"
+popd
