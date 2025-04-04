@@ -206,9 +206,6 @@ class CombineDeb:
         self,
         engine: AsyncEngine,
     ) -> None:
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-
         async with async_sessionmaker(engine)() as session:
             await self.combine(session)
             await session.commit()
