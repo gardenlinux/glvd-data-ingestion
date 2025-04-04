@@ -11,9 +11,11 @@ from typing import (
 
 from sqlalchemy import (
     ForeignKey,
+    Identity,
     Index,
     Column,
     Boolean,
+    Integer,
 )
 from sqlalchemy.orm import (
     DeclarativeBase,
@@ -58,7 +60,9 @@ class NvdCve(Base):
 class DistCpe(Base):
     __tablename__ = 'dist_cpe'
 
-    id: Mapped[int] = mapped_column(init=False, primary_key=True)
+    id = Column(
+        "id", Integer, Identity(start=1), primary_key=True
+    )
     cpe_vendor: Mapped[str]
     cpe_product: Mapped[str]
     cpe_version: Mapped[str]
