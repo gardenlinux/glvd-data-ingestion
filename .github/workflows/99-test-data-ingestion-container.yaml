@@ -42,5 +42,12 @@ jobs:
       - name: Build and Test
         run: |
           docker build -t data-ingestion-test -f Containerfile .
-          docker run --network=host --env PGUSER --env PGDATABASE --env PGPASSWORD --env PGHOST --env PGPORT data-ingestion-test \
-            bash -c "psql glvd -f /usr/local/src/schema/glvd-db-schema.sql && /usr/local/src/ingest-postgres.sh && pg_dump --schema-only -U glvd glvd"
+          docker run --network=host --name=data-ingestion-test --env PGUSER --env PGDATABASE --env PGPASSWORD --env PGHOST --env PGPORT data-ingestion-test \
+            bash -c "psql glvd -f /usr/local/src/schema/glvd-db-schema.sql && /usr/local/src/ingest-postgres.sh && pg_dump --schema-only -U glvd glvd && pg_dump -U glvd glvd > /tmp/glvd-dump.sql"
+          docker cp data-ingestion-test:/tmp/glvd-dump.sql ./glvd-dump.sql
+
+      - name: Upload db dump
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: glvd-dump.sql
+          path: glvd-dump.sql
