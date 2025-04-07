@@ -4,6 +4,8 @@ CREATE TABLE public.all_cve (
     data json NOT NULL
 );
 ALTER TABLE public.all_cve OWNER TO glvd;
+ALTER TABLE ONLY public.all_cve
+    ADD CONSTRAINT all_cve_pkey PRIMARY KEY (cve_id);
 
 CREATE TABLE public.nvd_cve (
     cve_id text NOT NULL,
@@ -11,6 +13,8 @@ CREATE TABLE public.nvd_cve (
     data json NOT NULL
 );
 ALTER TABLE public.nvd_cve OWNER TO glvd;
+ALTER TABLE ONLY public.nvd_cve
+    ADD CONSTRAINT nvd_cve_pkey PRIMARY KEY (cve_id);
 
 CREATE TABLE public.cve_context (
     dist_id integer,
@@ -35,6 +39,8 @@ CREATE TABLE public.cve_context_kernel (
     source_data jsonb NOT NULL
 );
 ALTER TABLE public.cve_context_kernel OWNER TO glvd;
+ALTER TABLE ONLY public.cve_context_kernel
+    ADD CONSTRAINT cve_context_kernel_pkey PRIMARY KEY (cve_id, lts_version);
 
 CREATE TABLE public.deb_cve (
     dist_id integer,
@@ -49,6 +55,9 @@ CREATE TABLE public.deb_cve (
     data_cpe_match json NOT NULL
 );
 ALTER TABLE public.deb_cve OWNER TO glvd;
+ALTER TABLE ONLY public.deb_cve
+    ADD CONSTRAINT deb_cve_pkey PRIMARY KEY (dist_id, cve_id, deb_source);
+CREATE INDEX deb_cve_search ON public.deb_cve USING btree (dist_id, debsec_vulnerable, deb_source, deb_version);
 
 CREATE TABLE public.debsec_cve (
     dist_id integer,
@@ -61,6 +70,8 @@ CREATE TABLE public.debsec_cve (
     debsec_note text
 );
 ALTER TABLE public.debsec_cve OWNER TO glvd;
+ALTER TABLE ONLY public.debsec_cve
+    ADD CONSTRAINT debsec_cve_pkey PRIMARY KEY (dist_id, cve_id, deb_source);
 
 CREATE TABLE public.debsrc (
     dist_id integer,
@@ -70,6 +81,8 @@ CREATE TABLE public.debsrc (
     deb_version public.debversion NOT NULL
 );
 ALTER TABLE public.debsrc OWNER TO glvd;
+ALTER TABLE ONLY public.debsrc
+    ADD CONSTRAINT debsrc_pkey PRIMARY KEY (dist_id, deb_source);
 
 CREATE TABLE public.dist_cpe (
     id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
@@ -79,6 +92,8 @@ CREATE TABLE public.dist_cpe (
     deb_codename text NOT NULL
 );
 ALTER TABLE public.dist_cpe OWNER TO glvd;
+ALTER TABLE ONLY public.dist_cpe
+    ADD CONSTRAINT dist_cpe_pkey PRIMARY KEY (id);
 
 CREATE OR REPLACE VIEW public.cve_with_context
  AS
