@@ -73,6 +73,7 @@ class Debsrc(Base):
     __tablename__ = 'debsrc'
 
     dist_id = mapped_column(ForeignKey(DistCpe.id), primary_key=True)
+    gardenlinux_version = Column(Text)
     last_mod: Mapped[datetime] = mapped_column(init=False, server_default=func.now(), onupdate=func.now())
     deb_source: Mapped[str] = mapped_column(primary_key=True)
     deb_version: Mapped[str] = mapped_column(DebVersion)
@@ -87,6 +88,7 @@ class DebsecCve(Base):
     __tablename__ = 'debsec_cve'
 
     dist_id = mapped_column(ForeignKey(DistCpe.id), primary_key=True)
+    gardenlinux_version = Column(Text)
     cve_id: Mapped[str] = mapped_column(primary_key=True)
     last_mod: Mapped[datetime] = mapped_column(init=False, server_default=func.now(), onupdate=func.now())
     deb_source: Mapped[str] = mapped_column(primary_key=True)
@@ -106,6 +108,7 @@ class DebCve(Base):
     __tablename__ = 'deb_cve'
 
     dist_id = mapped_column(ForeignKey(DistCpe.id), primary_key=True)
+    gardenlinux_version = Column(Text)
     cve_id: Mapped[str] = mapped_column(primary_key=True)
     last_mod: Mapped[datetime] = mapped_column(init=False, server_default=func.now(), onupdate=func.now())
     cvss_severity: Mapped[Optional[CvssSeverity]] = mapped_column()
