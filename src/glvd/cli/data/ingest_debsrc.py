@@ -81,7 +81,8 @@ class IngestDebsrc:
             entry = r[0]
 
             new_entry = file.pop(entry.deb_source, None)
-            new_entry.gardenlinux_version = self.dist.cpe_version
+            if self.dist.cpe_product == 'gardenlinux':
+                new_entry.gardenlinux_version = self.dist.cpe_version
             if not new_entry:
                 await session.delete(entry)
                 continue
@@ -109,7 +110,8 @@ class IngestDebsrc:
 
         for entry in file.values():
             entry.dist = dist
-            entry.gardenlinux_version = self.dist.cpe_version
+            if dist.cpe_product == 'gardenlinux':
+                entry.gardenlinux_version = dist.cpe_version
             session.add(entry)
 
     async def import_file(
