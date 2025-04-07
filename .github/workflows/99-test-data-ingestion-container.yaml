@@ -30,7 +30,7 @@ jobs:
       PGUSER: glvd
       PGDATABASE: glvd
       PGPASSWORD: glvd
-      PGHOST: postgres
+      PGHOST: localhost
       PGPORT: 5432
 
     steps:
