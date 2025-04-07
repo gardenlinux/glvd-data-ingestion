@@ -83,6 +83,8 @@ class IngestDebsec:
                 await session.delete(entry)
                 continue
 
+            new_entry.gardenlinux_version = entry.dist.cpe_version
+            
             # Update object in place. Only real changes will be committed
             entry.merge(new_entry)
 
@@ -116,6 +118,7 @@ class IngestDebsec:
 
             for entry in dist_entries.values():
                 entry.dist = dist
+                entry.gardenlinux_version = dist.cpe_version
                 session.add(entry)
 
     async def import_cve(
