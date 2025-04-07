@@ -17,7 +17,7 @@ ALTER TABLE ONLY public.nvd_cve
     ADD CONSTRAINT nvd_cve_pkey PRIMARY KEY (cve_id);
 
 CREATE TABLE public.cve_context (
-    dist_id integer,
+    dist_id integer NOT NULL,
     gardenlinux_version text,
     cve_id text NOT NULL,
     create_date timestamp with time zone DEFAULT now() NOT NULL,
@@ -43,7 +43,7 @@ ALTER TABLE ONLY public.cve_context_kernel
     ADD CONSTRAINT cve_context_kernel_pkey PRIMARY KEY (cve_id, lts_version);
 
 CREATE TABLE public.deb_cve (
-    dist_id integer,
+    dist_id integer NOT NULL,
     gardenlinux_version text,
     cve_id text NOT NULL,
     last_mod timestamp with time zone DEFAULT now() NOT NULL,
@@ -60,7 +60,7 @@ ALTER TABLE ONLY public.deb_cve
 CREATE INDEX deb_cve_search ON public.deb_cve USING btree (dist_id, debsec_vulnerable, deb_source, deb_version);
 
 CREATE TABLE public.debsec_cve (
-    dist_id integer,
+    dist_id integer NOT NULL,
     gardenlinux_version text,
     cve_id text NOT NULL,
     last_mod timestamp with time zone DEFAULT now() NOT NULL,
@@ -74,7 +74,7 @@ ALTER TABLE ONLY public.debsec_cve
     ADD CONSTRAINT debsec_cve_pkey PRIMARY KEY (dist_id, cve_id, deb_source);
 
 CREATE TABLE public.debsrc (
-    dist_id integer,
+    dist_id integer NOT NULL,
     gardenlinux_version text,
     last_mod timestamp with time zone DEFAULT now() NOT NULL,
     deb_source text NOT NULL,
