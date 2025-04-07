@@ -32,6 +32,8 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
 
+      - run: psql glvd -f schema/glvd-db-schema.sql
+
       - name: Ingest Data
         run: /usr/local/src/ingest-postgres.sh
 

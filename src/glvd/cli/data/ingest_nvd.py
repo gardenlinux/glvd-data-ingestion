@@ -86,6 +86,9 @@ class IngestNvd:
 
                 await asyncio.sleep(self.wait)
 
+                # fixme just for debugging
+                break
+
             # No more entries left
             else:
                 break
