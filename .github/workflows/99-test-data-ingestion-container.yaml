@@ -1,0 +1,45 @@
+name: Test Data Ingestion Container
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        default: main
+        description: Branch to test on
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: ghcr.io/gardenlinux/glvd-postgres:latest
+        env:
+          POSTGRES_USER: glvd
+          POSTGRES_DB: glvd
+          POSTGRES_PASSWORD: glvd
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    env:
+      PGUSER: glvd
+      PGDATABASE: glvd
+      PGPASSWORD: glvd
+      PGHOST: postgres
+      PGPORT: 5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+
+      - name: Install dependencies
+        run: |
+          podman build -t data-ingestion-test -f Containerfile .
+          podman run --env PGUSER --env PGDATABASE --env PGPASSWORD --env PGHOST --env PGPORT data-ingestion-test bash -c "psql glvd -f schema/glvd-db-schema.sql"
