@@ -1,4 +1,4 @@
-name: Test Data Ingestion Container
+name: 99 - Test Data Ingestion Container
 
 on:
   workflow_dispatch:
@@ -39,7 +39,7 @@ jobs:
         with:
           ref: ${{ inputs.branch }}
 
-      - name: Install dependencies
+      - name: Build and Test
         run: |
           podman build -t data-ingestion-test -f Containerfile .
-          podman run --env PGUSER --env PGDATABASE --env PGPASSWORD --env PGHOST --env PGPORT data-ingestion-test bash -c "psql glvd -f schema/glvd-db-schema.sql"
+          podman run --network=host --env PGUSER --env PGDATABASE --env PGPASSWORD --env PGHOST --env PGPORT data-ingestion-test bash -c "psql glvd -f schema/glvd-db-schema.sql"
