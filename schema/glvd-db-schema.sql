@@ -44,7 +44,7 @@ CREATE TABLE public.cve_context_kernel (
     lts_version text NOT NULL,
     fixed_version text,
     is_fixed boolean NOT NULL,
-    is_relevant_module boolean NOT NULL,
+    is_relevant_subsystem boolean NOT NULL,
     source_data jsonb NOT NULL
 );
 ALTER TABLE public.cve_context_kernel OWNER TO glvd;
