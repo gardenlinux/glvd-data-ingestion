@@ -92,8 +92,6 @@ CREATE TABLE public.dist_cpe (
     deb_codename text NOT NULL
 );
 ALTER TABLE public.dist_cpe OWNER TO glvd;
-ALTER TABLE ONLY public.dist_cpe
-    ADD CONSTRAINT dist_cpe_pkey PRIMARY KEY (id);
 
 CREATE OR REPLACE VIEW public.cve_with_context
  AS
@@ -180,61 +178,60 @@ CREATE OR REPLACE VIEW public.sourcepackage
 ALTER TABLE public.sourcepackage
     OWNER TO glvd;
 
--- fixme fwilhe
--- CREATE OR REPLACE VIEW public.cvedetails AS
---  SELECT nvd_cve.cve_id,
---     (nvd_cve.data -> 'vulnStatus'::text) AS vulnstatus,
---     (nvd_cve.data -> 'published'::text) AS published,
---     (nvd_cve.data -> 'lastModified'::text) AS modified,
---     nvd_cve.last_mod AS ingested,
---     array_agg(cve_context.description) AS cve_context_description,
---     array_agg(dist_cpe.cpe_product) AS distro,
---     array_agg(dist_cpe.cpe_version) AS distro_version,
---     array_agg(deb_cve.debsec_vulnerable) AS is_vulnerable,
---     array_agg(deb_cve.deb_source) AS source_package_name,
---     array_agg((deb_cve.deb_version)::text) AS source_package_version,
---     array_agg((deb_cve.deb_version_fixed)::text) AS version_fixed,
---     (((nvd_cve.data -> 'descriptions'::text) -> 0) -> 'value'::text) AS description,
---     ((((((nvd_cve.data -> 'metrics'::text) -> 'cvssMetricV40'::text) -> 0) -> 'cvssData'::text) ->> 'baseScore'::text))::numeric AS base_score_v40,
---     ((((((nvd_cve.data -> 'metrics'::text) -> 'cvssMetricV31'::text) -> 0) -> 'cvssData'::text) ->> 'baseScore'::text))::numeric AS base_score_v31,
---     ((((((nvd_cve.data -> 'metrics'::text) -> 'cvssMetricV30'::text) -> 0) -> 'cvssData'::text) ->> 'baseScore'::text))::numeric AS base_score_v30,
---     ((((((nvd_cve.data -> 'metrics'::text) -> 'cvssMetricV2'::text) -> 0) -> 'cvssData'::text) ->> 'baseScore'::text))::numeric AS base_score_v2,
---     (((((nvd_cve.data -> 'metrics'::text) -> 'cvssMetricV40'::text) -> 0) -> 'cvssData'::text) ->> 'vectorString'::text) AS vector_string_v40,
---     (((((nvd_cve.data -> 'metrics'::text) -> 'cvssMetricV31'::text) -> 0) -> 'cvssData'::text) ->> 'vectorString'::text) AS vector_string_v31,
---     (((((nvd_cve.data -> 'metrics'::text) -> 'cvssMetricV30'::text) -> 0) -> 'cvssData'::text) ->> 'vectorString'::text) AS vector_string_v30,
---     (((((nvd_cve.data -> 'metrics'::text) -> 'cvssMetricV2'::text) -> 0) -> 'cvssData'::text) ->> 'vectorString'::text) AS vector_string_v2
---    FROM (((public.nvd_cve
---      JOIN public.deb_cve USING (cve_id))
---      JOIN public.dist_cpe ON ((deb_cve.dist_id = dist_cpe.id)))
---      FULL JOIN public.cve_context USING (cve_id, dist_id))
---   GROUP BY nvd_cve.cve_id;
--- ALTER TABLE public.cvedetails
---     OWNER TO glvd;
+CREATE OR REPLACE VIEW public.cvedetails AS
+ SELECT nvd_cve.cve_id,
+    (nvd_cve.data -> 'vulnStatus'::text) AS vulnstatus,
+    (nvd_cve.data -> 'published'::text) AS published,
+    (nvd_cve.data -> 'lastModified'::text) AS modified,
+    nvd_cve.last_mod AS ingested,
+    array_agg(cve_context.description) AS cve_context_description,
+    array_agg(dist_cpe.cpe_product) AS distro,
+    array_agg(dist_cpe.cpe_version) AS distro_version,
+    array_agg(deb_cve.debsec_vulnerable) AS is_vulnerable,
+    array_agg(deb_cve.deb_source) AS source_package_name,
+    array_agg((deb_cve.deb_version)::text) AS source_package_version,
+    array_agg((deb_cve.deb_version_fixed)::text) AS version_fixed,
+    (((nvd_cve.data -> 'descriptions'::text) -> 0) -> 'value'::text) AS description,
+    ((((((nvd_cve.data -> 'metrics'::text) -> 'cvssMetricV40'::text) -> 0) -> 'cvssData'::text) ->> 'baseScore'::text))::numeric AS base_score_v40,
+    ((((((nvd_cve.data -> 'metrics'::text) -> 'cvssMetricV31'::text) -> 0) -> 'cvssData'::text) ->> 'baseScore'::text))::numeric AS base_score_v31,
+    ((((((nvd_cve.data -> 'metrics'::text) -> 'cvssMetricV30'::text) -> 0) -> 'cvssData'::text) ->> 'baseScore'::text))::numeric AS base_score_v30,
+    ((((((nvd_cve.data -> 'metrics'::text) -> 'cvssMetricV2'::text) -> 0) -> 'cvssData'::text) ->> 'baseScore'::text))::numeric AS base_score_v2,
+    (((((nvd_cve.data -> 'metrics'::text) -> 'cvssMetricV40'::text) -> 0) -> 'cvssData'::text) ->> 'vectorString'::text) AS vector_string_v40,
+    (((((nvd_cve.data -> 'metrics'::text) -> 'cvssMetricV31'::text) -> 0) -> 'cvssData'::text) ->> 'vectorString'::text) AS vector_string_v31,
+    (((((nvd_cve.data -> 'metrics'::text) -> 'cvssMetricV30'::text) -> 0) -> 'cvssData'::text) ->> 'vectorString'::text) AS vector_string_v30,
+    (((((nvd_cve.data -> 'metrics'::text) -> 'cvssMetricV2'::text) -> 0) -> 'cvssData'::text) ->> 'vectorString'::text) AS vector_string_v2
+   FROM (((public.nvd_cve
+     JOIN public.deb_cve USING (cve_id))
+     JOIN public.dist_cpe ON ((deb_cve.dist_id = dist_cpe.id)))
+     FULL JOIN public.cve_context USING (cve_id, dist_id))
+  GROUP BY nvd_cve.cve_id;
+ALTER TABLE public.cvedetails
+    OWNER TO glvd;
 
--- CREATE OR REPLACE VIEW public.nvd_exclusive_cve
---  AS
---  SELECT nvd_cve.cve_id, nvd_cve.data,
---    FROM nvd_cve
---      LEFT JOIN all_cve ON nvd_cve.cve_id = all_cve.cve_id
---   WHERE all_cve.cve_id IS NULL
---   ORDER BY nvd_cve.cve_id DESC
---  LIMIT 500;
--- ALTER TABLE public.nvd_exclusive_cve
---     OWNER TO glvd;
+CREATE OR REPLACE VIEW public.nvd_exclusive_cve
+ AS
+ SELECT nvd_cve.cve_id, nvd_cve.data,
+   FROM nvd_cve
+     LEFT JOIN all_cve ON nvd_cve.cve_id = all_cve.cve_id
+  WHERE all_cve.cve_id IS NULL
+  ORDER BY nvd_cve.cve_id DESC
+ LIMIT 500;
+ALTER TABLE public.nvd_exclusive_cve
+    OWNER TO glvd;
 
--- CREATE OR REPLACE VIEW public.nvd_exclusive_cve_matching_gl
---  AS
---  SELECT nvd_exclusive_cve.cve_id,
---     ((nvd_exclusive_cve.data -> 'descriptions'::text) -> 0) -> 'value'::text AS description,
---     nvd_exclusive_cve.data -> 'vulnStatus'::text AS vulnstatus,
---     nvd_exclusive_cve.data -> 'published'::text AS published,
---     nvd_exclusive_cve.data -> 'lastModified'::text AS modified
---    FROM nvd_exclusive_cve
---      JOIN ( SELECT debsrc.deb_source
---            FROM debsrc
---           WHERE debsrc.dist_id = 15) filtered_debsrc ON (EXISTS ( SELECT 1
---            FROM jsonb_array_elements(nvd_exclusive_cve.data::jsonb -> 'descriptions'::text) description(value)
---           WHERE (description.value ->> 'lang'::text) = 'en'::text AND (description.value ->> 'value'::text) ~~* (('%'::text || filtered_debsrc.deb_source) || '%'::text)));
--- ALTER TABLE public.nvd_exclusive_cve_matching_gl
---     OWNER TO glvd;
+CREATE OR REPLACE VIEW public.nvd_exclusive_cve_matching_gl
+ AS
+ SELECT nvd_exclusive_cve.cve_id,
+    ((nvd_exclusive_cve.data -> 'descriptions'::text) -> 0) -> 'value'::text AS description,
+    nvd_exclusive_cve.data -> 'vulnStatus'::text AS vulnstatus,
+    nvd_exclusive_cve.data -> 'published'::text AS published,
+    nvd_exclusive_cve.data -> 'lastModified'::text AS modified
+   FROM nvd_exclusive_cve
+     JOIN ( SELECT debsrc.deb_source
+           FROM debsrc
+          WHERE debsrc.dist_id = 15) filtered_debsrc ON (EXISTS ( SELECT 1
+           FROM jsonb_array_elements(nvd_exclusive_cve.data::jsonb -> 'descriptions'::text) description(value)
+          WHERE (description.value ->> 'lang'::text) = 'en'::text AND (description.value ->> 'value'::text) ~~* (('%'::text || filtered_debsrc.deb_source) || '%'::text)));
+ALTER TABLE public.nvd_exclusive_cve_matching_gl
+    OWNER TO glvd;
 
