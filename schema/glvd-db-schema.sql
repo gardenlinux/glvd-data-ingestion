@@ -1,3 +1,12 @@
+CREATE TABLE public.dist_cpe (
+    id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    cpe_vendor text NOT NULL,
+    cpe_product text NOT NULL,
+    cpe_version text NOT NULL,
+    deb_codename text NOT NULL
+);
+ALTER TABLE public.dist_cpe OWNER TO glvd;
+
 CREATE TABLE public.all_cve (
     cve_id text NOT NULL,
     last_mod timestamp with time zone DEFAULT now() NOT NULL,
@@ -89,15 +98,6 @@ ALTER TABLE ONLY public.debsrc
     ADD CONSTRAINT debsrc_pkey PRIMARY KEY (dist_id, deb_source);
 ALTER TABLE ONLY public.debsrc
     ADD CONSTRAINT debsrc_dist_id_fkey FOREIGN KEY (dist_id) REFERENCES public.dist_cpe(id);
-
-CREATE TABLE public.dist_cpe (
-    id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    cpe_vendor text NOT NULL,
-    cpe_product text NOT NULL,
-    cpe_version text NOT NULL,
-    deb_codename text NOT NULL
-);
-ALTER TABLE public.dist_cpe OWNER TO glvd;
 
 
 CREATE OR REPLACE VIEW public.cve_with_context
