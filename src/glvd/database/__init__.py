@@ -148,5 +148,5 @@ class CveContextKernel(Base):
     lts_version = Column(Text, primary_key=True, nullable=False)
     fixed_version = Column(Text)
     is_fixed = Column(Boolean, nullable=False)
-    is_relevant_module = Column(Boolean, nullable=False)
+    is_relevant_subsystem = Column(Boolean, nullable=False)
     source_data = Column(JSONB, nullable=False)
