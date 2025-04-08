@@ -222,32 +222,3 @@ CREATE OR REPLACE VIEW public.cvedetails
 ALTER TABLE public.cvedetails
     OWNER TO glvd;
 
-
-CREATE OR REPLACE VIEW public.nvd_exclusive_cve
- AS
- SELECT nvd_cve.cve_id, nvd_cve.data,
-   FROM nvd_cve
-     LEFT JOIN all_cve ON nvd_cve.cve_id = all_cve.cve_id
-  WHERE all_cve.cve_id IS NULL
-  ORDER BY nvd_cve.cve_id DESC
- LIMIT 500;
-
-ALTER TABLE public.nvd_exclusive_cve
-    OWNER TO glvd;
-
-CREATE OR REPLACE VIEW public.nvd_exclusive_cve_matching_gl
- AS
- SELECT nvd_exclusive_cve.cve_id,
-    ((nvd_exclusive_cve.data -> 'descriptions'::text) -> 0) -> 'value'::text AS description,
-    nvd_exclusive_cve.data -> 'vulnStatus'::text AS vulnstatus,
-    nvd_exclusive_cve.data -> 'published'::text AS published,
-    nvd_exclusive_cve.data -> 'lastModified'::text AS modified
-   FROM nvd_exclusive_cve
-     JOIN ( SELECT debsrc.deb_source
-           FROM debsrc
-          WHERE debsrc.dist_id = 15) filtered_debsrc ON (EXISTS ( SELECT 1
-           FROM jsonb_array_elements(nvd_exclusive_cve.data::jsonb -> 'descriptions'::text) description(value)
-          WHERE (description.value ->> 'lang'::text) = 'en'::text AND (description.value ->> 'value'::text) ~~* (('%'::text || filtered_debsrc.deb_source) || '%'::text)));
-
-ALTER TABLE public.nvd_exclusive_cve_matching_gl
-    OWNER TO glvd;
