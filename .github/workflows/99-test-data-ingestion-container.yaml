@@ -43,7 +43,7 @@ jobs:
         run: |
           docker build -t data-ingestion-test -f Containerfile .
           docker run --network=host --name=data-ingestion-test --env PGUSER --env PGDATABASE --env PGPASSWORD --env PGHOST --env PGPORT data-ingestion-test \
-            bash -c "psql glvd -f /usr/local/src/schema/glvd-db-schema.sql && /usr/local/src/ingest-postgres.sh && pg_dump --schema-only -U glvd glvd && pg_dump -U glvd glvd > /tmp/glvd-dump.sql"
+            bash -c "/usr/local/src/container-ci.sh"
           docker cp data-ingestion-test:/tmp/glvd-dump.sql ./glvd-dump.sql
 
       - name: Upload db dump
