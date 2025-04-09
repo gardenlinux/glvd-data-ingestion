@@ -108,7 +108,7 @@ class DebCve(Base):
     __tablename__ = 'deb_cve'
 
     dist_id = mapped_column(ForeignKey(DistCpe.id), primary_key=True)
-    gardenlinux_version = Column(Text)
+    gardenlinux_version: Mapped[str] = mapped_column(Text)
     cve_id: Mapped[str] = mapped_column(primary_key=True)
     last_mod: Mapped[datetime] = mapped_column(init=False, server_default=func.now(), onupdate=func.now())
     cvss_severity: Mapped[Optional[CvssSeverity]] = mapped_column()
