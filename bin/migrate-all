@@ -16,7 +16,7 @@ then
   exit 1;
 fi;
 
-files=$(find $1 -iname "*.sql"); #| xargs printf -- '-f %s\n' | xargs psql $DATABASE_URL -1 -v ON_ERROR_STOP=1;
+files=$(find $1 -iname "*.sql" | sort); #| xargs printf -- '-f %s\n' | xargs psql $DATABASE_URL -1 -v ON_ERROR_STOP=1;
 for file in $files;
 do
   psql $DATABASE_URL -1 -v ON_ERROR_STOP=1 -f $file;
