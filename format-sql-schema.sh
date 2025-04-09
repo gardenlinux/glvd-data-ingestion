@@ -1,11 +1,10 @@
 #!/bin/bash
 set -e
+set -x
 
-podman build -t pg-formatter -f Containerfile.pg-formatter .
+podman build -t localhost/pg-formatter:latest -f Containerfile.pg-formatter .
 
-
-files=$(find schema -iname "*.sql");
-for file in $files;
-do
-  podman run --rm --volume "$(pwd):/work" localhost/foo:latest -i /work/"$file"
-done;
+find schema -iname "*.sql" -print0 | while IFS= read -r -d '' file; do
+    echo Formatting "$file"..
+    podman run --rm --volume "$(pwd):/work" localhost/pg-formatter:latest -i /work/"$file"
+done
