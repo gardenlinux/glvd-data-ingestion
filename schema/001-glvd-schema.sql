@@ -1,3 +1,5 @@
+SELECT assert_latest_migration(0);
+
 CREATE TABLE public.dist_cpe (
     id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     cpe_vendor text NOT NULL,
@@ -222,3 +224,4 @@ CREATE OR REPLACE VIEW public.cvedetails
 ALTER TABLE public.cvedetails
     OWNER TO glvd;
 
+SELECT log_migration(1);
