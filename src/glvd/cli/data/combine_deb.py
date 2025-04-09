@@ -188,8 +188,13 @@ class CombineDeb:
                 if deb_version_fixed:
                     cpe_match['deb']['versionEndExcluding'] = deb_version_fixed
 
+                gardenlinux_version = None
+                if dist.cpe_product == "gardenlinux":
+                    gardenlinux_version = dist.cpe_version
+
                 new_entries[(cve_id, deb_source)] = DebCve(
                     dist=dist,
+                    gardenlinux_version=gardenlinux_version,
                     cve_id=cve_id,
                     cvss_severity=cvss_severity,
                     deb_source=deb_source,
