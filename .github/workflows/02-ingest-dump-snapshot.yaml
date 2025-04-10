@@ -32,14 +32,14 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
 
+      - run: DATABASE_URL=glvd bin/migrate-all /usr/local/src/schema
+
       - name: Ingest Data
         run: /usr/local/src/ingest-postgres.sh
 
       - run: |
           echo "$PGHOST:$PGPORT:$PGDATABASE:$PGUSER:$PGPASSWORD" > ~/.pgpass
           chmod 0600 ~/.pgpass
-
-      - run: psql glvd -f extra-schema.sql
 
       - name: Add dummy ingestion data
         run: |

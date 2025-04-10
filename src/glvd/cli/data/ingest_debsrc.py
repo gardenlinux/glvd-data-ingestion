@@ -81,6 +81,8 @@ class IngestDebsrc:
             entry = r[0]
 
             new_entry = file.pop(entry.deb_source, None)
+            if self.dist.cpe_product == 'gardenlinux':
+                new_entry.gardenlinux_version = self.dist.cpe_version
             if not new_entry:
                 await session.delete(entry)
                 continue
@@ -108,6 +110,8 @@ class IngestDebsrc:
 
         for entry in file.values():
             entry.dist = dist
+            if dist.cpe_product == 'gardenlinux':
+                entry.gardenlinux_version = dist.cpe_version
             session.add(entry)
 
     async def import_file(
@@ -123,9 +127,6 @@ class IngestDebsrc:
         self,
         engine: AsyncEngine,
     ) -> None:
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-
         async with async_sessionmaker(engine)() as session:
             await self.import_file(session)
             await session.commit()

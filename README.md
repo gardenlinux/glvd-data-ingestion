@@ -60,3 +60,15 @@ python3 -m glvd.cli.data.ingest_nvd
 ```
 
 (Replace `today` with the version, like `1443`)
+
+## Copyright Notice
+
+This project ships the following 3rd party software:
+
+[nalanj/migrations](https://github.com/nalanj/migrations), Copyright nalanj under the MIT License
+
+Affecting the following files:
+
+- `bin/migrate-all`
+- `bin/migrate`
+- `schema/000-bootstrap.sql`

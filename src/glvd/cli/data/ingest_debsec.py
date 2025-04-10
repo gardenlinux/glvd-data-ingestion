@@ -83,6 +83,9 @@ class IngestDebsec:
                 await session.delete(entry)
                 continue
 
+            if entry.dist.cpe_product == 'gardenlinux':
+                new_entry.gardenlinux_version = entry.dist.cpe_version
+
             # Update object in place. Only real changes will be committed
             entry.merge(new_entry)
 
@@ -116,6 +119,8 @@ class IngestDebsec:
 
             for entry in dist_entries.values():
                 entry.dist = dist
+                if dist.cpe_product == 'gardenlinux':
+                    entry.gardenlinux_version = dist.cpe_version
                 session.add(entry)
 
     async def import_cve(
@@ -131,9 +136,6 @@ class IngestDebsec:
         self,
         engine: AsyncEngine,
     ) -> None:
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-
         async with async_sessionmaker(engine)() as session:
             await self.import_cve(session)
             await session.commit()
