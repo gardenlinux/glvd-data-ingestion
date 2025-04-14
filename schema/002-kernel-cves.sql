@@ -93,6 +93,7 @@ SELECT
     k.cve_id,
     k.source_package_name,
     k.source_package_version,
+    k.lts_version,
     k.gardenlinux_version,
     k.is_vulnerable,
     k.fixed_version,
