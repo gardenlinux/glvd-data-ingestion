@@ -45,6 +45,13 @@ jobs:
           docker run --network=host --name=data-ingestion-test --env PGUSER --env PGDATABASE --env PGPASSWORD --env PGHOST --env PGPORT data-ingestion-test \
             bash -c "/usr/local/src/container-ci.sh"
           docker cp data-ingestion-test:/tmp/glvd-dump.sql ./glvd-dump.sql
+          docker cp data-ingestion-test:/tmp/glvd-schema.sql ./glvd-schema.sql
+
+      - name: Upload db schema
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: glvd-schema.sql
+          path: glvd-schema.sql
 
       - name: Upload db dump
         uses: actions/upload-artifact@v4.6.2
