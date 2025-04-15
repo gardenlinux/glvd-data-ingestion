@@ -140,6 +140,7 @@ CREATE OR REPLACE VIEW public.kernel_cvedetails AS
 SELECT
     nvd_cve.cve_id AS cve_id,
     nvd_cve.data -> 'vulnStatus'::text AS vulnstatus,
+    ((nvd_cve.data -> 'descriptions'::text) -> 0) -> 'value'::text AS description,
     nvd_cve.data -> 'published'::text AS published,
     nvd_cve.data -> 'lastModified'::text AS modified,
     nvd_cve.last_mod AS ingested,
@@ -147,7 +148,6 @@ SELECT
     array_agg(cve_context_kernel.fixed_version) AS fixed_version,
     array_agg(cve_context_kernel.is_fixed) AS is_fixed,
     array_agg(cve_context_kernel.is_relevant_subsystem) AS is_relevant_subsystem,
-    ((nvd_cve.data -> 'descriptions'::text) -> 0) -> 'value'::text AS description,
     (((((nvd_cve.data -> 'metrics'::text) -> 'cvssMetricV40'::text) -> 0) -> 'cvssData'::text) ->> 'baseScore'::text)::numeric AS base_score_v40,
     (((((nvd_cve.data -> 'metrics'::text) -> 'cvssMetricV31'::text) -> 0) -> 'cvssData'::text) ->> 'baseScore'::text)::numeric AS base_score_v31,
     (((((nvd_cve.data -> 'metrics'::text) -> 'cvssMetricV30'::text) -> 0) -> 'cvssData'::text) ->> 'baseScore'::text)::numeric AS base_score_v30,
