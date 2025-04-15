@@ -166,3 +166,4 @@ ALTER TABLE public.kernel_cvedetails OWNER TO glvd;
 
 SELECT
     log_migration (2);
+
