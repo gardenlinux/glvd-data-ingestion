@@ -81,11 +81,12 @@ class IngestDebsrc:
             entry = r[0]
 
             new_entry = file.pop(entry.deb_source, None)
-            if self.dist.cpe_product == 'gardenlinux':
-                new_entry.gardenlinux_version = self.dist.cpe_version
             if not new_entry:
                 await session.delete(entry)
                 continue
+
+            if self.dist.cpe_product == 'gardenlinux':
+                new_entry.gardenlinux_version = self.dist.cpe_version
 
             # Update object in place. Only real changes will be committed
             entry.merge(new_entry)
