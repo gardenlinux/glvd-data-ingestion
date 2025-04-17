@@ -19,3 +19,11 @@ SELECT
 SELECT
     log_migration (N);
 ```
+
+## Apply Schema migrations to a GLVD Gardener Cluster
+
+To apply a schema migration to your cluster, ensure you have an image available that contains your desired schema and run a command similar to this:
+
+```
+kubectl run db-migration$RANDOM --image=ghcr.io/gardenlinux/glvd-data-ingestion:latest --env=DATABASE_URL=postgres://glvd:$(kubectl get secret/postgres-credentials --template="{{.data.password}}" | base64 -d)@glvd-database-0.glvd-database:5432/glvd -- bash -c "/usr/local/src/bin/migrate /usr/local/src/schema/0XX-your-migration.sql"
+```
