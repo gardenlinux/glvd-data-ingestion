@@ -144,6 +144,7 @@ SELECT
     nvd_cve.data -> 'published'::text AS published,
     nvd_cve.data -> 'lastModified'::text AS modified,
     nvd_cve.last_mod AS ingested,
+    array_agg(cve_context.description) AS cve_context_description,
     array_agg(cve_context_kernel.lts_version) AS lts_version,
     array_agg(cve_context_kernel.fixed_version) AS fixed_version,
     array_agg(cve_context_kernel.is_fixed) AS is_fixed,
@@ -159,6 +160,7 @@ SELECT
 FROM
     nvd_cve
     JOIN cve_context_kernel USING (cve_id)
+    JOIN cve_context USING (cve_id)
 GROUP BY
     nvd_cve.cve_id;
 
