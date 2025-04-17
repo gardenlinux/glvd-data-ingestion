@@ -160,7 +160,7 @@ SELECT
 FROM
     nvd_cve
     JOIN cve_context_kernel USING (cve_id)
-    JOIN cve_context USING (cve_id)
+    FULL JOIN cve_context USING (cve_id)
 GROUP BY
     nvd_cve.cve_id;
 
