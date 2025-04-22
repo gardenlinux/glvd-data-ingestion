@@ -67,6 +67,7 @@ SELECT
         OR cve_context_kernel.fixed_version IS NULL)
     AND cve_context_kernel.is_relevant_subsystem IS TRUE
     AND cve_context.is_resolved IS NOT TRUE) = TRUE AS is_vulnerable,
+    cve_context.is_resolved,
     cve_context_kernel.is_relevant_subsystem,
     cve_context_kernel.lts_version,
     cve_context_kernel.fixed_version::debversion AS fixed_version,
@@ -82,8 +83,7 @@ WHERE
     dist_cpe.cpe_product = 'gardenlinux'::text
     AND ((deb_cve.deb_version < cve_context_kernel.fixed_version::debversion
             OR cve_context_kernel.fixed_version IS NULL)
-        AND cve_context_kernel.is_relevant_subsystem IS TRUE
-        AND cve_context.is_resolved IS NOT TRUE) = TRUE
+        AND cve_context_kernel.is_relevant_subsystem IS TRUE) = TRUE
     AND deb_cve.deb_source = 'linux'::text;
 
 ALTER TABLE public.kernel_vulns OWNER TO glvd;
