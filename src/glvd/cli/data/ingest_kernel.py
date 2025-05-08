@@ -32,12 +32,68 @@ lts_versions = ["6.6", "6.12"]
 # List of irrelevant kernel subsystems in the context of Garden Linux.
 # We still record CVEs related to those subsystems, but we'll focus less on them.
 irrelevant_subsystems = [
-    "afs", "xen", "x86/hyperv", "wifi", "video/", "staging", "drm", "can", "Bluetooth", "mmc", "nfc", "thunderbolt",
-    "s390", "riscv", "powerpc", "nouveau", "media", "leds", "usb", "MIPS", "nilfs2", "ubifs", "ocfs2", "spi", "i3c",
-    "um", "udf", "atm", "eventfs", "fs/9p", "gtp", "hid", "i2c", "ice", "hwmon", "mailbox", "misc", "f2fs", "libfs",
-    "dma-buf", "binder", "alsa", "dev/parport", "closures", "devres", "fs/ntfs3", "hfs", "hfsplus", "ibmvnic", "iio",
-    "jfs", "misdn", "padata", "pds_core", "parisc", "loongarch"
+    "afs",
+    "xen",
+    "x86/hyperv",
+    "wifi",
+    "video/",
+    "staging",
+    "drm",
+    "can",
+    "Bluetooth",
+    "mmc",
+    "nfc",
+    "thunderbolt",
+    "s390",
+    "riscv",
+    "powerpc",
+    "nouveau",
+    "media",
+    "leds",
+    "usb",
+    "MIPS",
+    "nilfs2",
+    "ubifs",
+    "ocfs2",
+    "spi",
+    "i3c",
+    "um",
+    "udf",
+    "atm",
+    "eventfs",
+    "fs/9p",
+    "gtp",
+    "hid",
+    "i2c",
+    "ice",
+    "hwmon",
+    "mailbox",
+    "misc",
+    "f2fs",
+    "libfs",
+    "dma-buf",
+    "binder",
+    "alsa",
+    "dev/parport",
+    "closures",
+    "devres",
+    "fs/ntfs3",
+    "hfs",
+    "hfsplus",
+    "ibmvnic",
+    "iio",
+    "jfs",
+    "misdn",
+    "padata",
+    "pds_core",
+    "parisc",
+    "loongarch",
+    "isofs",
+    "sound",
+    "drivers/soc/samsung",
+    "drivers/hsi",
 ]
+
 
 def compare_versions(v1: str, v2: str) -> int:
     v1_parts = list(map(int, v1.split(".")))
@@ -66,7 +122,9 @@ def is_relevant_subsystem(program_files: list[str]) -> bool:
     return True
 
 
-def get_fixed_versions(lts_versions: list[str], cve_data: dict) -> dict[str, str | None]:
+def get_fixed_versions(
+    lts_versions: list[str], cve_data: dict
+) -> dict[str, str | None]:
     fixed_versions = dict.fromkeys(lts_versions, None)
 
     for entry in cve_data["containers"]["cna"]["affected"]:
@@ -166,13 +224,13 @@ class IngestKernel:
                     source_data=contents,
                 )
                 .on_conflict_do_update(
-                    index_elements=['cve_id', 'lts_version'],
+                    index_elements=["cve_id", "lts_version"],
                     set_={
-                        'fixed_version': version,
-                        'is_fixed': is_fixed,
-                        'is_relevant_subsystem': relevant_subsystem,
-                        'source_data': contents,
-                    }
+                        "fixed_version": version,
+                        "is_fixed": is_fixed,
+                        "is_relevant_subsystem": relevant_subsystem,
+                        "source_data": contents,
+                    },
                 )
             )
 
