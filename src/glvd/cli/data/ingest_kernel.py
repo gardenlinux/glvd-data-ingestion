@@ -88,6 +88,10 @@ irrelevant_subsystems = [
     "pds_core",
     "parisc",
     "loongarch",
+    "isofs",
+    "sound",
+    "drivers/soc/samsung",
+    "drivers/hsi"
 ]
 
 
