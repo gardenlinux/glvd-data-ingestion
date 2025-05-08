@@ -91,7 +91,7 @@ irrelevant_subsystems = [
     "isofs",
     "sound",
     "drivers/soc/samsung",
-    "drivers/hsi"
+    "drivers/hsi",
 ]
 
 
