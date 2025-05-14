@@ -9,3 +9,4 @@ ALTER TABLE public.cve_context
 
 SELECT
     log_migration (3);
+
