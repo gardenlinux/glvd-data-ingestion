@@ -17,8 +17,6 @@ mkdir -p /usr/local/src/data/ingest-debsec/debian/CVE
 mkdir -p /usr/local/src/data/ingest-debsrc/{debian,gardenlinux}
 mkdir -p /usr/local/src/data/ingest-debsrc/var/lib/dpkg
 touch /usr/local/src/data/ingest-debsrc/var/lib/dpkg/status
-curl https://salsa.debian.org/security-tracker-team/security-tracker/-/raw/master/data/CVE/list?ref_type=heads \
-    --output /usr/local/src/data/ingest-debsec/debian/CVE/list
 mkdir -p /usr/local/src/conf/ingest-debsrc/
 
 export APT_CONFIG=/usr/local/src/conf/ingest-debsrc/apt.conf 
@@ -33,7 +31,8 @@ apt-get update \
 -o Dir::Etc::sourcelist="/usr/local/src/conf/ingest-debsrc/gardenlinux.sources" \
 -o Dir::State="/usr/local/src/data/ingest-debsrc/gardenlinux/"
 
-git clone --depth=1 https://salsa.debian.org/security-tracker-team/security-tracker
+curl https://security-tracker.debian.org/tracker/data/json \
+    --output /usr/local/src/data/ingest-debsec/debian-security-tracker.json
 git clone --depth=1 https://git.kernel.org/pub/scm/linux/security/vulns.git
 
 find /usr/local/src/data -name '*source_Sources'
@@ -43,7 +42,8 @@ python3 -m glvd.cli.data.ingest_debsrc debian trixie /usr/local/src/data/ingest-
 echo "Run data ingestion (ingest-debsrc - debian bookworm)"
 python3 -m glvd.cli.data.ingest_debsrc debian bookworm /usr/local/src/data/ingest-debsrc/debian/lists/deb.debian.org_debian_dists_bookworm_main_source_Sources
 echo "Run data ingestion (ingest-debsec - debian)"
-python3 -m glvd.cli.data.ingest_debsec debian security-tracker/data
+python3 -m glvd.cli.data.ingest_debsec debian /usr/local/src/data/ingest-debsec/debian-security-tracker.json
+
 
 echo "Run data ingestion (ingest-debsrc - gardenlinux today)"
 python3 -m glvd.cli.data.ingest_debsrc gardenlinux today /usr/local/src/data/ingest-debsrc/gardenlinux/lists/packages.gardenlinux.io_gardenlinux_dists_today_main_source_Sources

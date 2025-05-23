@@ -4,6 +4,10 @@ FROM docker.io/library/debian:trixie-slim
 #   python3 -m glvd.cli.data
 #   python3 -m glvd.cli.data.ingest_kernel /vulns/cve/published/ --debug
 
+# Sample commands to run locally from the project root
+# (assuming dependencies are installed in venv, and venv is activated)
+# PYTHONPATH=src/ python -m glvd.data.debsec_cve
+
 ENV PGUSER=glvd
 ENV PGDATABASE=glvd
 ENV PGPASSWORD=glvd

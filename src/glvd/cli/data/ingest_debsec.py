@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import json
 from pathlib import Path
 
 from sqlalchemy import select
@@ -35,17 +36,17 @@ class IngestDebsec:
                 metavar='CPE_PRODUCT',
             ),
             cli.prepare_argument(
-                'dir',
-                help='data directory out of https://salsa.debian.org/security-tracker-team/security-tracker',
+                'json_file',
+                help='copy of https://security-tracker.debian.org/tracker/data/json',
                 metavar='DEBSEC',
                 type=Path,
             ),
         ]
     )
-    def run(*, argparser: None, cpe_product: str, dir: Path, database: str, debug: bool) -> None:
+    def run(*, argparser: None, cpe_product: str, json_file: Path, database: str, debug: bool) -> None:
         logging.basicConfig(level=debug and logging.DEBUG or logging.INFO)
         engine = create_async_engine(database, echo=debug)
-        asyncio.run(IngestDebsec(cpe_product, dir)(engine))
+        asyncio.run(IngestDebsec(cpe_product, json_file)(engine))
 
     def __init__(self, cpe_product: str, path: Path) -> None:
         self.path = path
@@ -54,9 +55,10 @@ class IngestDebsec:
 
     def read_cve(self) -> DebsecCveFile:
         r = DebsecCveFile()
-        with (self.path / 'CVE' / 'list').open('r') as f:
-            r.read(f)
-        return r
+        with open(self.path) as f:
+            j = json.load(f)
+            r.read(j)
+            return r
 
     async def import_cve_update(
         self,
