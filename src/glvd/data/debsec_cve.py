@@ -13,7 +13,7 @@ class DebsecCveFile(dict[str, dict[tuple[str, str], DebsecCve]]):
         for package, cves in f.items():
             for cve_id, entry in cves.items():
                 # Filter out TEMP- and other non-CVE entries
-                if not cve_id.startswith('CVE-'):
+                if cve_id.startswith('CVE-'):
                     for release in entry['releases']:
                         if release != 'sid': 
                             codename = release
