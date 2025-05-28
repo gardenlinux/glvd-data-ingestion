@@ -18,9 +18,12 @@ jobs:
       # - name: Run format script
       #   run: ./format-sql-schema.sh
 
-      - name: Run Unit Tests
+      - name: Build Container for Unit Tests
         run: |
           podman build -t localhost/unit-tests:latest -f Containerfile.unit-tests .
+
+      - name: Run Unit Tests
+        run: |
           podman run -t localhost/unit-tests:latest
 
       - name: Check for uncommitted changes
