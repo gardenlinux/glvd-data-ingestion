@@ -11,6 +11,14 @@
             "module": "glvd.data.debsec_cve",
             "cwd": "${workspaceFolder}/src",
             "args": ["${workspaceFolder}/debian-security-tracker.json"]
+        },
+        {
+            "name": "debsrc",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "glvd.data.debsrc",
+            "cwd": "${workspaceFolder}/src",
+            "args": ["${workspaceFolder}/working-data/package-list"]
         }
     ]
 }
