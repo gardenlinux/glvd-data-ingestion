@@ -7,6 +7,21 @@ on:
   pull_request:
 
 jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Container for Unit Tests
+        run: |
+          podman build -t localhost/unit-tests:latest -f Containerfile.unit-tests .
+
+      - name: Run Unit Tests
+        run: |
+          podman run -t localhost/unit-tests:latest
+
   format-check:
     runs-on: ubuntu-latest
 
@@ -14,8 +29,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run format script
-        run: ./format-sql-schema.sh
+      # Disable for now because this fails due to github rate limit
+      # - name: Run format script
+      #   run: ./format-sql-schema.sh
 
       - name: Check for uncommitted changes
         run: |
