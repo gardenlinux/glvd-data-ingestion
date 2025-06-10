@@ -1,6 +1,6 @@
 FROM perl:bookworm
 
-ADD https://github.com/darold/pgFormatter/archive/refs/tags/v5.6.tar.gz /pgformatter.tgz
+COPY pgformatter.tgz /pgformatter.tgz
 RUN tar xf /pgformatter.tgz -C /
 
 WORKDIR /pgFormatter-5.6
