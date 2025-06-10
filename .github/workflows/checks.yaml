@@ -29,9 +29,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Disable for now because this fails due to github rate limit
-      # - name: Run format script
-      #   run: ./format-sql-schema.sh
+      - name: Download pg formatter using github token to avoid issues with rate limiting
+        run: |
+          curl -H "Authorization: Bearer $GITHUB_TOKEN" -L -o pgformatter.tgz https://github.com/darold/pgFormatter/archive/refs/tags/v5.6.tar.gz
+
+      - name: Run format script
+        run: ./format-sql-schema.sh
 
       - name: Check for uncommitted changes
         run: |
