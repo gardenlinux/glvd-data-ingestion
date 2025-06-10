@@ -10,7 +10,7 @@
             "request": "launch",
             "module": "glvd.data.debsec_cve",
             "cwd": "${workspaceFolder}/src",
-            "args": ["${workspaceFolder}/debian-security-tracker.json"]
+            "args": ["${workspaceFolder}/working-data/debian-security-tracker.json"]
         },
         {
             "name": "debsrc",
