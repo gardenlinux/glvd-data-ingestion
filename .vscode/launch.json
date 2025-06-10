@@ -19,6 +19,14 @@
             "module": "glvd.data.debsrc",
             "cwd": "${workspaceFolder}/src",
             "args": ["${workspaceFolder}/working-data/package-list"]
+        },
+        {
+            "name": "combine_deb",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "glvd.cli.data.combine_deb",
+            "cwd": "${workspaceFolder}/src",
+            "args": ["--database=postgresql+asyncpg://glvd:glvd@localhost:5432/glvd"]
         }
     ]
 }
