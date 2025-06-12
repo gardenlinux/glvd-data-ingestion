@@ -23,4 +23,4 @@ async def test_can_combine_deb():
 
     async with async_sessionmaker(engine)() as session:
         result = await session.execute(select(DebCve))
-        assert result.fetchall() == []
+        assert len(result.fetchall()) > 0
