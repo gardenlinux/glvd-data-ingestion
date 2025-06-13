@@ -3,9 +3,24 @@
 from __future__ import annotations
 
 import json
+import re
 
 from ..database import DebsecCve
 
+
+def extract_minor(version):
+    # Remove epoch if present (e.g., '1:' in '1:1.37.0-5')
+    version = version.split(':', 1)[-1]
+    # Extract the numeric part before any dash or plus
+    main_part = re.split(r'[-+]', version)[0]
+    # Split by dot and take first two numeric components
+    parts = main_part.split('.')
+    if len(parts) >= 2:
+        return f"{parts[0]}.{parts[1]}"
+    elif len(parts) == 1:
+        return parts[0]
+    else:
+        return None
 
 class DebsecCveFile(dict[str, dict[tuple[str, str], DebsecCve]]):
 
@@ -26,6 +41,7 @@ class DebsecCveFile(dict[str, dict[tuple[str, str], DebsecCve]]):
                                 dist=None,
                                 deb_source=package,
                                 deb_version_fixed=version_fixed,
+                                minor_deb_version_fixed=extract_minor(version_fixed),
                                 debsec_tag=tag,
                                 debsec_note=note,
                             )
