@@ -211,6 +211,7 @@ CREATE TABLE public.debsec_cve (
     last_mod timestamp with time zone DEFAULT now() NOT NULL,
     deb_source text NOT NULL,
     deb_version_fixed public.debversion,
+    minor_deb_version_fixed text,
     debsec_tag text,
     debsec_note text
 );

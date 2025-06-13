@@ -30,6 +30,6 @@ INSERT INTO public.debsrc (dist_id, gardenlinux_version, last_mod, deb_source, d
 INSERT INTO public.debsrc (dist_id, gardenlinux_version, last_mod, deb_source, deb_version) VALUES (23, '1592.9', '2025-04-23 14:59:03.494857+00', 'glibc', '2.39-6gl0~bp1592');
 
 
-INSERT INTO public.debsec_cve (dist_id, gardenlinux_version, cve_id, last_mod, deb_source, deb_version_fixed, debsec_tag, debsec_note) VALUES (3, NULL, 'CVE-2024-33601', '2025-04-10 15:13:00.016011+00', 'glibc', '2.37-19', NULL, NULL);
-INSERT INTO public.debsec_cve (dist_id, gardenlinux_version, cve_id, last_mod, deb_source, deb_version_fixed, debsec_tag, debsec_note) VALUES (4, NULL, 'CVE-2024-33601', '2025-04-10 15:13:00.016011+00', 'glibc', '2.31-13+deb11u10', NULL, NULL);
-INSERT INTO public.debsec_cve (dist_id, gardenlinux_version, cve_id, last_mod, deb_source, deb_version_fixed, debsec_tag, debsec_note) VALUES (2, NULL, 'CVE-2024-33601', '2025-04-10 15:13:00.016011+00', 'glibc', '2.36-9+deb12u7', NULL, NULL);
+INSERT INTO public.debsec_cve (dist_id, gardenlinux_version, cve_id, last_mod, deb_source, deb_version_fixed, minor_deb_version_fixed, debsec_tag, debsec_note) VALUES (3, NULL, 'CVE-2024-33601', '2025-04-10 15:13:00.016011+00', 'glibc', '2.37-19', '2.37', NULL, NULL);
+INSERT INTO public.debsec_cve (dist_id, gardenlinux_version, cve_id, last_mod, deb_source, deb_version_fixed, minor_deb_version_fixed, debsec_tag, debsec_note) VALUES (4, NULL, 'CVE-2024-33601', '2025-04-10 15:13:00.016011+00', 'glibc', '2.31-13+deb11u10', '2.31', NULL, NULL);
+INSERT INTO public.debsec_cve (dist_id, gardenlinux_version, cve_id, last_mod, deb_source, deb_version_fixed, minor_deb_version_fixed, debsec_tag, debsec_note) VALUES (2, NULL, 'CVE-2024-33601', '2025-04-10 15:13:00.016011+00', 'glibc', '2.36-9+deb12u7', '2.36', NULL, NULL);
