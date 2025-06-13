@@ -9,6 +9,8 @@ from ..database import DebsecCve
 
 
 def extract_minor(version):
+    if version is None:
+        return ''
     # Remove epoch if present (e.g., '1:' in '1:1.37.0-5')
     version = version.split(':', 1)[-1]
     # Extract the numeric part before any dash or plus
@@ -20,7 +22,7 @@ def extract_minor(version):
     elif len(parts) == 1:
         return parts[0]
     else:
-        return None
+        return ''
 
 class DebsecCveFile(dict[str, dict[tuple[str, str], DebsecCve]]):
 
