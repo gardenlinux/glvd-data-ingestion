@@ -1,8 +1,13 @@
 #!/bin/bash
+set -e
 
-podman build -t localhost/glvd-postgres-integration-test:latest tests/integration/db
-podman run --detach --name=glvd-postgres-integration-test --publish 5432:5432 --env POSTGRES_USER=glvd --env POSTGRES_DB=glvd --env POSTGRES_PASSWORD=glvd localhost/glvd-postgres-integration-test:latest postgres -c log_statement=all
-
-sleep 20
+# Check if PostgreSQL is running on localhost:5432
+if ! nc -z localhost 5432; then
+    echo "PostgreSQL is not running on localhost:5432"
+    echo "Run:"
+    echo "  make && make run"
+    echo "in tests/integration/db and re-run the test."
+    exit 1
+fi
 
 PYTHONPATH=src pytest -vv tests/integration/
