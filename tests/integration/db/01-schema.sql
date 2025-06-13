@@ -228,7 +228,8 @@ CREATE TABLE public.debsrc (
     gardenlinux_version text,
     last_mod timestamp with time zone DEFAULT now() NOT NULL,
     deb_source text NOT NULL,
-    deb_version public.debversion NOT NULL
+    deb_version public.debversion NOT NULL,
+    minor_deb_version text
 );
 
 
