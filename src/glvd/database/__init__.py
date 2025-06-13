@@ -72,11 +72,17 @@ class DistCpe(Base):
 class Debsrc(Base):
     __tablename__ = 'debsrc'
 
+    def __init__(self, deb_source, deb_version, minor_deb_version):
+        self.deb_source = deb_source
+        self.deb_version = deb_version
+        self.minor_deb_version = minor_deb_version
+
     dist_id = mapped_column(ForeignKey(DistCpe.id), primary_key=True)
     gardenlinux_version = Column(Text)
     last_mod: Mapped[datetime] = mapped_column(init=False, server_default=func.now(), onupdate=func.now())
     deb_source: Mapped[str] = mapped_column(primary_key=True)
     deb_version: Mapped[str] = mapped_column(DebVersion)
+    minor_deb_version: Mapped[str] = mapped_column(Text)
 
     dist: Mapped[Optional[DistCpe]] = relationship(lazy='selectin', default=None)
 
