@@ -1,0 +1,86 @@
+{
+    "vim": {
+        "CVE-2023-5344": {
+            "description": "Heap-based Buffer Overflow in GitHub repository vim/vim prior to 9.0.1969.",
+            "debianbug": 1053694,
+            "scope": "local",
+            "releases": {
+                "bookworm": {
+                    "status": "resolved",
+                    "repositories": {
+                        "bookworm": "2:9.0.1378-2+deb12u2"
+                    },
+                    "fixed_version": "2:9.0.1378-2+deb12u1",
+                    "urgency": "not yet assigned"
+                },
+                "bullseye": {
+                    "status": "resolved",
+                    "repositories": {
+                        "bullseye": "2:8.2.2434-3+deb11u1",
+                        "bullseye-security": "2:8.2.2434-3+deb11u3"
+                    },
+                    "fixed_version": "2:8.2.2434-3+deb11u2",
+                    "urgency": "not yet assigned"
+                },
+                "sid": {
+                    "status": "resolved",
+                    "repositories": {
+                        "sid": "2:9.1.1230-1"
+                    },
+                    "fixed_version": "2:9.0.2018-1",
+                    "urgency": "not yet assigned"
+                },
+                "trixie": {
+                    "status": "resolved",
+                    "repositories": {
+                        "trixie": "2:9.1.1230-1"
+                    },
+                    "fixed_version": "2:9.0.2018-1",
+                    "urgency": "not yet assigned"
+                }
+            }
+        }
+    },
+    "glibc": {
+        "CVE-2024-33601": {
+            "description": "nscd: netgroup cache may terminate daemon on memory allocation failure  The Name Service Cache Daemon's (nscd) netgroup cache uses xmalloc or xrealloc and these functions may terminate the process due to a memory allocation failure resulting in a denial of service to the clients.  The flaw was introduced in glibc 2.15 when the cache was added to nscd.  This vulnerability is only present in the nscd binary.",
+            "scope": "local",
+            "releases": {
+                "bookworm": {
+                    "status": "resolved",
+                    "repositories": {
+                        "bookworm": "2.36-9+deb12u10",
+                        "bookworm-security": "2.36-9+deb12u7"
+                    },
+                    "fixed_version": "2.36-9+deb12u7",
+                    "urgency": "not yet assigned"
+                },
+                "bullseye": {
+                    "status": "resolved",
+                    "repositories": {
+                        "bullseye": "2.31-13+deb11u11",
+                        "bullseye-security": "2.31-13+deb11u12"
+                    },
+                    "fixed_version": "2.31-13+deb11u10",
+                    "urgency": "not yet assigned"
+                },
+                "sid": {
+                    "status": "resolved",
+                    "repositories": {
+                        "sid": "2.41-8"
+                    },
+                    "fixed_version": "2.37-19",
+                    "urgency": "not yet assigned"
+                },
+                "trixie": {
+                    "status": "resolved",
+                    "repositories": {
+                        "trixie": "2.41-7"
+                    },
+                    "fixed_version": "2.37-19",
+                    "urgency": "not yet assigned"
+                }
+            }
+        }
+    }
+}
