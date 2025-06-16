@@ -74,7 +74,6 @@ class CombineDeb:
                 WHERE
                     debsrc.dist_id = :dist_id
                     AND debsec_cve.dist_id = ANY(:dists_fallback_id)
-                    AND debsrc.minor_deb_version = debsec_cve.minor_deb_version_fixed
         ''')
         .bindparams(
             bindparam('dist_id'),
