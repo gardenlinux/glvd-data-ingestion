@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import asyncio
 import logging
 from typing import (
@@ -190,6 +191,7 @@ class CombineDeb:
                 # This will lead to false positives, but without this we get false negatives
                 # If you compare version 2.39-6 and fixed_version 2.37-19, there is no safe way to determine if it is vulnerable
                 if extract_minor(deb_version) != extract_minor(deb_version_fixed):
+                    print(f">>>debug log: setting debsec_vulnerable to true for {deb_source} {dist}")
                     debsec_vulnerable = True
 
                 cpe = Cpe(
