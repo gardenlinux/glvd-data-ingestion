@@ -30,6 +30,24 @@ from . import cli
 logger = logging.getLogger(__name__)
 
 
+def extract_minor(version):
+    if version is None:
+        return ''
+    # Remove epoch if present (e.g., '1:' in '1:1.37.0-5')
+    version = version.split(':', 1)[-1]
+    # Extract the numeric part before any dash or plus
+    main_part = re.split(r'[-+]', version)[0]
+    # Split by dot and take first two numeric components
+    parts = main_part.split('.')
+    if len(parts) >= 2:
+        return f"{parts[0]}.{parts[1]}"
+    elif len(parts) == 1:
+        return parts[0]
+    else:
+        return ''
+
+
+
 class CombineDeb:
     @staticmethod
     @cli.register('combine-deb')
@@ -167,6 +185,12 @@ class CombineDeb:
                 cvss_severity = self.extract_cvss_severity(nvd_data)
                 if 'unimportant' in debsec_notes:
                     cvss_severity = CvssSeverity.UNIMPORTANT
+
+                # Assume we're vulnerable if minor versions don't match
+                # This will lead to false positives, but without this we get false negatives
+                # If you compare version 2.39-6 and fixed_version 2.37-19, there is no safe way to determine if it is vulnerable
+                if extract_minor(deb_version) != extract_minor(deb_version_fixed):
+                    debsec_vulnerable = True
 
                 cpe = Cpe(
                     part=Cpe.PART.OS,
