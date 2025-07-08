@@ -6,6 +6,7 @@ import re
 from typing import TextIO
 
 from ..database import Debsrc
+from glvd.util.minor import extract_minor
 
 
 class DebsrcFile(dict[str, Debsrc]):
@@ -31,6 +32,7 @@ class DebsrcFile(dict[str, Debsrc]):
         self[source] = Debsrc(
             deb_source=source,
             deb_version=version,
+            minor_deb_version=extract_minor(version),
         )
 
     def read(self, f: TextIO) -> None:
