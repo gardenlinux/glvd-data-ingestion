@@ -40,7 +40,7 @@ def test_can_parse_debsec_cve_file():
                 cve_id='CVE-2023-5344',
                 deb_source='vim',
                 deb_version_fixed=None,
-                minor_deb_version_fixed='',
+                minor_deb_version_fixed=None,
                 debsec_tag='postponed',
                 debsec_note='Minor issue, 1-byte overflow',
                 dist=None,
