@@ -67,7 +67,7 @@ class CombineDeb:
             bindparam('dist_id'),
             bindparam('dists_fallback_id'),
         )
-   
+    )
 
     def extract_cvss_severity(
         self,
