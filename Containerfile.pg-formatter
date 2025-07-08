@@ -1,4 +1,4 @@
-FROM perl:5.41.13-bookworm
+FROM perl:5.40.2-bookworm
 
 COPY pgformatter.tgz /pgformatter.tgz
 RUN tar xf /pgformatter.tgz -C /
