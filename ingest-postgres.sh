@@ -10,6 +10,11 @@ export GL_VERSIONS_WITH_SOURCE_REPO
 
 echo Supporting Garden Linux versions "$GL_VERSIONS_WITH_SOURCE_REPO"
 
+
+# fixme
+pip install --break-system-packages python-debian
+
+
 envsubst < /usr/local/src/conf/ingest-debsrc/gardenlinux.sources.template > /usr/local/src/conf/ingest-debsrc/gardenlinux.sources
 
 mkdir -p /usr/local/src/data/ingest-debsec/{debian,gardenlinux}/CVE
@@ -47,6 +52,9 @@ python3 -m glvd.cli.data.ingest_debsec debian security-tracker/data
 
 echo "Run data ingestion (ingest-debsrc - gardenlinux today)"
 python3 -m glvd.cli.data.ingest_debsrc gardenlinux today /usr/local/src/data/ingest-debsrc/gardenlinux/lists/packages.gardenlinux.io_gardenlinux_dists_today_main_source_Sources
+
+
+
 
 for version in $GL_VERSIONS_WITH_SOURCE_REPO; do
     echo "Run data ingestion (ingest-debsrc - gardenlinux $version)"
