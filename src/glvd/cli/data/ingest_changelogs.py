@@ -145,7 +145,7 @@ class IngestChangelogs:
             else:
                 logger.warning(f"No dist_id found for gardenlinux version {self.gl_version}")
 
-            sources_path = f"/usr/local/src/data/ingest-debsrc/gardenlinux/lists/packages.gardenlinux.io_gardenlinux_dists_${self.gl_version}_main_source_Sources"
+            sources_path = f"/usr/local/src/data/ingest-debsrc/gardenlinux/lists/packages.gardenlinux.io_gardenlinux_dists_{self.gl_version}_main_source_Sources"
 
 
             parsed_entries = parse_debian_apt_source_index_file(sources_path)
