@@ -134,7 +134,7 @@ class IngestChangelogs:
             
             dist_id = None
             result = await session.execute(
-                select(DistCpe.dist_id).where(
+                select(DistCpe.id).where(
                     DistCpe.cpe_product == "gardenlinux",
                     DistCpe.cpe_version == str(self.gl_version)
                 )
