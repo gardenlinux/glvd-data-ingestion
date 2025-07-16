@@ -8,7 +8,12 @@ import logging
 import os
 from pathlib import Path
 from sqlalchemy import select
-
+import re
+import requests
+import lzma
+import tarfile
+import io
+from debian import changelog
 
 from sqlalchemy.dialects.postgresql import insert
 
@@ -19,11 +24,69 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-from glvd.database import Base, CveContext, DebCve
+from glvd.database import Base, CveContext, DebCve, DistCpe
 from . import cli
 
 
 logger = logging.getLogger(__name__)
+
+
+def parse_debian_apt_source_index_file(file_path):
+    logger.debug(f"Parsing Debian APT source index file: {file_path}")
+    try:
+        with open(file_path, 'r') as f:
+            content = f.read()
+    except Exception as e:
+        logger.error(f"Failed to read file {file_path}: {e}")
+        raise
+
+    entries = re.split(r'\n\s*\n', content.strip())
+    results = []
+
+    for entry in entries:
+        lines = entry.strip().split('\n')
+        format_ = None
+        directory = None
+        files = []
+        in_files_section = False
+
+        for line in lines:
+            if line.startswith('Format:'):
+                format_ = line.split(':', 1)[1].strip()
+            elif line.startswith('Directory:'):
+                directory = line.split(':', 1)[1].strip()
+            elif line.startswith('Package:'):
+                package = line.split(':', 1)[1].strip()
+            elif line.startswith('Files:'):
+                in_files_section = True
+            elif in_files_section:
+                if line.strip() == '':
+                    continue
+                if line.startswith(' ') or line.startswith('\t'):
+                    files.append(line.strip())
+                else:
+                    in_files_section = False
+
+        # We have special handling for the kernel because we don't use debian's build for that
+        if package != 'linux':
+            results.append({
+                'Format': format_,
+                'Directory': directory,
+                'Files': files,
+                'Package': package
+            })
+
+    logger.debug(f"Parsed {len(results)} entries from source index file")
+    return results
+
+def add_cve_entry(resolved_cves, cve_id, package_name, changelog_text):
+    logger.debug(f"Adding CVE entry: {cve_id} for package {package_name}")
+    if cve_id not in resolved_cves:
+        resolved_cves[cve_id] = {}
+    if package_name not in resolved_cves[cve_id]:
+        resolved_cves[cve_id][package_name] = []
+    resolved_cves[cve_id][package_name].append(changelog_text)
+
 
 
 class IngestChangelogs:
@@ -66,6 +129,86 @@ class IngestChangelogs:
             )
             vulnerable_cves = result.scalars().all()
             print(vulnerable_cves)
+            cve_ids = [cve.cve_id for cve in vulnerable_cves]
+            print(cve_ids)
+            
+            dist_id = None
+            result = await session.execute(
+                select(DistCpe.dist_id).where(
+                    DistCpe.cpe_product == "gardenlinux",
+                    DistCpe.cpe_version == str(self.gl_version)
+                )
+            )
+            dist_id_row = result.first()
+            if dist_id_row:
+                dist_id = dist_id_row[0]
+            else:
+                logger.warning(f"No dist_id found for gardenlinux version {self.gl_version}")
+
+            sources_path = f"/usr/local/src/data/ingest-debsrc/gardenlinux/lists/packages.gardenlinux.io_gardenlinux_dists_${self.gl_version}_main_source_Sources"
+
+
+            parsed_entries = parse_debian_apt_source_index_file(sources_path)
+            logger.info(f"Found {len(parsed_entries)} entries in source index file")
+
+            resolved_cves = {}
+
+
+            for entry in parsed_entries:
+                logger.debug(f"Processing entry: {entry.get('Package', 'unknown')}")
+                if entry['Format'] == "3.0 (quilt)":
+                    debian_tar_xz_file = next((f.split(' ')[2] for f in entry['Files'] if f.endswith('debian.tar.xz')), '')
+                    if debian_tar_xz_file != '':
+                        url = f"https://packages.gardenlinux.io/gardenlinux/{entry['Directory']}/{debian_tar_xz_file}"
+                        logger.debug(f"Downloading debian.tar.xz from {url}")
+                        try:
+                            response = requests.get(url)
+                            response.raise_for_status()
+                        except Exception as e:
+                            logger.error(f"Failed to download {url}: {e}")
+                            continue
+
+                        try:
+                            decompressed = lzma.decompress(response.content)
+                        except Exception as e:
+                            logger.error(f"Failed to decompress xz file for {entry['Package']}: {e}")
+                            continue
+
+                        try:
+                            with tarfile.open(fileobj=io.BytesIO(decompressed)) as tar:
+                                changelog_member = tar.getmember("debian/changelog")
+                                changelog_file = tar.extractfile(changelog_member)
+                                changelog_content = changelog_file.read().decode("utf-8")
+                                cl = changelog.Changelog(changelog_content)
+                                for changelog_entry in cl:
+                                    for change in changelog_entry.changes():
+                                        for cve in vulnerable_cves:
+                                            cve = str.strip(cve)
+                                            if cve in change:
+                                                add_cve_entry(resolved_cves, cve, entry['Package'], f"Automated triage based on changelog from {changelog_entry.date} in version {changelog_entry.version}:\n{change}")
+                        except Exception as e:
+                            logger.error(f"Failed to extract or parse changelog for {entry['Package']}: {e}")
+                            continue
+                elif entry['Format'] == "3.0 (native)":
+                    logger.debug(f"Skipping native format for {entry.get('Package', 'unknown')}")
+                    pass
+                elif entry['Format'] == "1.0":
+                    logger.debug(f"Skipping format 1.0 for {entry.get('Package', 'unknown')}")
+                    pass
+
+            # insert all values in resolved_cves into CveContext table
+            for cve_id, package_dict in resolved_cves.items():
+                for package_name, changelog_texts in package_dict.items():
+                    for changelog_text in changelog_texts:
+                        logger.debug(f"Inserting CVE context: cve_id={cve_id}, package={package_name}, version={self.gl_version}, dist_id={dist_id}")
+                        stmt = insert(CveContext).values(
+                            cve_id=cve_id,
+                            description=changelog_text,
+                            gardenlinux_version=str(self.gl_version),
+                            dist_id=dist_id,
+                        ).on_conflict_do_nothing()
+                        await session.execute(stmt)
+            await session.commit()
 
 
 if __name__ == "__main__":

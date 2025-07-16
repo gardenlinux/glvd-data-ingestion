@@ -155,7 +155,7 @@ class CveContext(Base):
 
     cve_id = Column(Text, primary_key=True, nullable=False)
     gardenlinux_version = Column(Text)
-    is_fixed = Column(Boolean, nullable=False)
+    is_resolved = Column(Boolean, nullable=False)
     description = Column(Text)
 
 class CveContextKernel(Base):
