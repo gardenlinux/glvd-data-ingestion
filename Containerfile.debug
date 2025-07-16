@@ -3,6 +3,7 @@ FROM docker.io/library/debian:trixie-slim
 # Sample command to run inside the container:
 #   python3 -m glvd.cli.data
 #   python3 -m glvd.cli.data.ingest_kernel /vulns/cve/published/ --debug
+#   python3 -m glvd.cli.data.ingest_changelogs 1592.7
 
 ENV PGUSER=glvd
 ENV PGDATABASE=glvd

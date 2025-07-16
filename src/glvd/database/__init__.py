@@ -150,6 +150,14 @@ class AllCve(Base):
     def merge(self, other: Self) -> None:
         self.data = other.data
 
+class CveContext(Base):
+    __tablename__ = 'cve_context'
+
+    cve_id = Column(Text, primary_key=True, nullable=False)
+    gardenlinux_version = Column(Text)
+    is_fixed = Column(Boolean, nullable=False)
+    description = Column(Text)
+
 class CveContextKernel(Base):
     __tablename__ = 'cve_context_kernel'
 
