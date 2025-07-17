@@ -26,6 +26,7 @@ from sqlalchemy.ext.asyncio import (
 
 from glvd.database import Base, CveContext, DebCve, DistCpe
 from . import cli
+import sys
 
 
 logger = logging.getLogger(__name__)
@@ -119,7 +120,7 @@ class IngestChangelogs:
                 select(CveContext).where(CveContext.gardenlinux_version == str(self.gl_version))
             )
             cve_contexts = result.scalars().all()
-            print(cve_contexts)
+            logger.debug(f"Loaded CVE contexts for Garden Linux {self.gl_version}: {cve_contexts}")
 
             result = await session.execute(
                 select(DebCve).where(
@@ -128,9 +129,9 @@ class IngestChangelogs:
                 )
             )
             vulnerable_cves = result.scalars().all()
-            print(vulnerable_cves)
+            logger.debug(f"Vulnerable CVEs for Garden Linux {self.gl_version}: {vulnerable_cves}")
             cve_ids = [cve.cve_id for cve in vulnerable_cves]
-            print(cve_ids)
+            logger.debug(f"Vulnerable CVE IDs for Garden Linux {self.gl_version}: {cve_ids}")
             
             dist_id = None
             result = await session.execute(
@@ -142,11 +143,13 @@ class IngestChangelogs:
             dist_id_row = result.first()
             if dist_id_row:
                 dist_id = dist_id_row[0]
+                logger.debug(f"Resolved Garden Linux version {self.gl_version} to dist id {dist_id}")
             else:
-                logger.warning(f"No dist_id found for gardenlinux version {self.gl_version}")
+                logger.error(f"No dist_id found for gardenlinux version {self.gl_version}")
+                sys.exit(1)
 
             sources_path = f"/usr/local/src/data/ingest-debsrc/gardenlinux/lists/packages.gardenlinux.io_gardenlinux_dists_{self.gl_version}_main_source_Sources"
-
+            logger.debug(f"Using apt sources file from {sources_path}")
 
             parsed_entries = parse_debian_apt_source_index_file(sources_path)
             logger.info(f"Found {len(parsed_entries)} entries in source index file")
