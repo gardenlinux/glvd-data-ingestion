@@ -209,6 +209,8 @@ class IngestChangelogs:
                             description=changelog_text,
                             gardenlinux_version=str(self.gl_version),
                             dist_id=dist_id,
+                            use_case='all',
+                            is_resolved=True,
                         ).on_conflict_do_nothing()
                         await session.execute(stmt)
             await session.commit()

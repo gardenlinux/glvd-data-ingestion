@@ -157,6 +157,7 @@ class CveContext(Base):
     gardenlinux_version = Column(Text)
     is_resolved = Column(Boolean, nullable=False)
     description = Column(Text)
+    use_case = Column(Text)
     dist_id = mapped_column(ForeignKey(DistCpe.id), primary_key=True)
 
 class CveContextKernel(Base):
