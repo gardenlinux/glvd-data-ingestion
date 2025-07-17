@@ -183,7 +183,7 @@ class IngestChangelogs:
                                 for changelog_entry in cl:
                                     for change in changelog_entry.changes():
                                         for cve in vulnerable_cves:
-                                            cve = str.strip(cve)
+                                            cve = str.strip(cve.cve_id)
                                             if cve in change:
                                                 add_cve_entry(resolved_cves, cve, entry['Package'], f"Automated triage based on changelog from {changelog_entry.date} in version {changelog_entry.version}:\n{change}")
                         except Exception as e:
