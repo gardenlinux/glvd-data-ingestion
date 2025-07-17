@@ -93,7 +93,7 @@ python3 -m glvd.cli.data.combine_all
 echo "Ingest changelogs to identify fixed CVEs"
 for version in $GL_VERSIONS_WITH_SOURCE_REPO; do
     echo "Run data ingestion (ingest_changelogs - gardenlinux $version)"
-    python3 -m glvd.cli.data.ingest_changelogs "$version" --debug
+    python3 -m glvd.cli.data.ingest_changelogs "$version"
 done
 
 

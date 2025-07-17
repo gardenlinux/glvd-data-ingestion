@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 
 
 def parse_debian_apt_source_index_file(file_path):
-    logger.debug(f"Parsing Debian APT source index file: {file_path}")
+    logger.info(f"Parsing Debian APT source index file: {file_path}")
     try:
         with open(file_path, 'r') as f:
             content = f.read()
@@ -77,11 +77,11 @@ def parse_debian_apt_source_index_file(file_path):
                 'Package': package
             })
 
-    logger.debug(f"Parsed {len(results)} entries from source index file")
+    logger.info(f"Parsed {len(results)} entries from source index file")
     return results
 
 def add_cve_entry(resolved_cves, cve_id, package_name, changelog_text):
-    logger.debug(f"Adding CVE entry: {cve_id} for package {package_name}")
+    logger.info(f"Adding CVE entry: {cve_id} for package {package_name}")
     if cve_id not in resolved_cves:
         resolved_cves[cve_id] = {}
     if package_name not in resolved_cves[cve_id]:
@@ -120,7 +120,7 @@ class IngestChangelogs:
                 select(CveContext).where(CveContext.gardenlinux_version == str(self.gl_version))
             )
             cve_contexts = result.scalars().all()
-            logger.debug(f"Loaded CVE contexts for Garden Linux {self.gl_version}: {cve_contexts}")
+            logger.info(f"Loaded CVE contexts for Garden Linux {self.gl_version}: {cve_contexts}")
 
             result = await session.execute(
                 select(DebCve).where(
@@ -129,9 +129,9 @@ class IngestChangelogs:
                 )
             )
             vulnerable_cves = result.scalars().all()
-            logger.debug(f"Vulnerable CVEs for Garden Linux {self.gl_version}: {vulnerable_cves}")
+            logger.info(f"Vulnerable CVEs for Garden Linux {self.gl_version}: {vulnerable_cves}")
             cve_ids = [cve.cve_id for cve in vulnerable_cves]
-            logger.debug(f"Vulnerable CVE IDs for Garden Linux {self.gl_version}: {cve_ids}")
+            logger.info(f"Vulnerable CVE IDs for Garden Linux {self.gl_version}: {cve_ids}")
             
             dist_id = None
             result = await session.execute(
@@ -143,13 +143,13 @@ class IngestChangelogs:
             dist_id_row = result.first()
             if dist_id_row:
                 dist_id = dist_id_row[0]
-                logger.debug(f"Resolved Garden Linux version {self.gl_version} to dist id {dist_id}")
+                logger.info(f"Resolved Garden Linux version {self.gl_version} to dist id {dist_id}")
             else:
                 logger.error(f"No dist_id found for gardenlinux version {self.gl_version}")
                 sys.exit(1)
 
             sources_path = f"/usr/local/src/data/ingest-debsrc/gardenlinux/lists/packages.gardenlinux.io_gardenlinux_dists_{self.gl_version}_main_source_Sources"
-            logger.debug(f"Using apt sources file from {sources_path}")
+            logger.info(f"Using apt sources file from {sources_path}")
 
             parsed_entries = parse_debian_apt_source_index_file(sources_path)
             logger.info(f"Found {len(parsed_entries)} entries in source index file")
@@ -158,12 +158,12 @@ class IngestChangelogs:
 
 
             for entry in parsed_entries:
-                logger.debug(f"Processing entry: {entry.get('Package', 'unknown')}")
+                logger.info(f"Processing entry: {entry.get('Package', 'unknown')}")
                 if entry['Format'] == "3.0 (quilt)":
                     debian_tar_xz_file = next((f.split(' ')[2] for f in entry['Files'] if f.endswith('debian.tar.xz')), '')
                     if debian_tar_xz_file != '':
                         url = f"https://packages.gardenlinux.io/gardenlinux/{entry['Directory']}/{debian_tar_xz_file}"
-                        logger.debug(f"Downloading debian.tar.xz from {url}")
+                        logger.info(f"Downloading debian.tar.xz from {url}")
                         try:
                             response = requests.get(url)
                             response.raise_for_status()
@@ -193,17 +193,17 @@ class IngestChangelogs:
                             logger.error(f"Failed to extract or parse changelog for {entry['Package']}: {e}")
                             continue
                 elif entry['Format'] == "3.0 (native)":
-                    logger.debug(f"Skipping native format for {entry.get('Package', 'unknown')}")
+                    logger.info(f"Skipping native format for {entry.get('Package', 'unknown')}")
                     pass
                 elif entry['Format'] == "1.0":
-                    logger.debug(f"Skipping format 1.0 for {entry.get('Package', 'unknown')}")
+                    logger.info(f"Skipping format 1.0 for {entry.get('Package', 'unknown')}")
                     pass
 
             # insert all values in resolved_cves into CveContext table
             for cve_id, package_dict in resolved_cves.items():
                 for package_name, changelog_texts in package_dict.items():
                     for changelog_text in changelog_texts:
-                        logger.debug(f"Inserting CVE context: cve_id={cve_id}, package={package_name}, version={self.gl_version}, dist_id={dist_id}")
+                        logger.info(f"Inserting CVE context: cve_id={cve_id}, package={package_name}, version={self.gl_version}, dist_id={dist_id}")
                         stmt = insert(CveContext).values(
                             cve_id=cve_id,
                             description=changelog_text,
