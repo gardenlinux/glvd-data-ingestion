@@ -21,4 +21,9 @@ RUN apt-get update && \
     apt-get upgrade -y --no-install-recommends vim
 COPY . /usr/local/src
 COPY keyring.asc /etc/apt/trusted.gpg.d/keyring.asc
+
+
+# fixme
+RUN pip install --break-system-packages python-debian
+
 RUN pip install --break-system-packages --no-deps --editable /usr/local/src
