@@ -2,10 +2,8 @@
 
 from __future__ import annotations
 
-import json
 import asyncio
 import logging
-import os
 from pathlib import Path
 from sqlalchemy import select
 import re
@@ -19,17 +17,16 @@ from sqlalchemy.dialects.postgresql import insert
 
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
-    AsyncSession,
     async_sessionmaker,
     create_async_engine,
 )
 
-from glvd.database import Base, CveContext, DebCve, DistCpe
+from glvd.database import CveContext, DebCve, DistCpe
 from . import cli
 import sys
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("ingest_changelogs")
 
 
 def parse_debian_apt_source_index_file(file_path):
@@ -132,7 +129,12 @@ class IngestChangelogs:
             logger.info(f"Vulnerable CVEs for Garden Linux {self.gl_version}: {vulnerable_cves}")
             cve_ids = [cve.cve_id for cve in vulnerable_cves]
             logger.info(f"Vulnerable CVE IDs for Garden Linux {self.gl_version}: {cve_ids}")
-            
+
+            # Only act on CVEs that don't have context yet
+            # Maybe this condition should be refined, for example to only match those where the status is set to 'resolved'
+            existing_cve_ids = {ctx.cve_id for ctx in cve_contexts}
+            cve_ids = [cve_id for cve_id in cve_ids if cve_id not in existing_cve_ids]
+
             dist_id = None
             result = await session.execute(
                 select(DistCpe.id).where(
@@ -145,7 +147,7 @@ class IngestChangelogs:
                 dist_id = dist_id_row[0]
                 logger.info(f"Resolved Garden Linux version {self.gl_version} to dist id {dist_id}")
             else:
-                logger.error(f"No dist_id found for gardenlinux version {self.gl_version}")
+                logger.error(f"No dist_id found for Garden Linux version {self.gl_version}")
                 sys.exit(1)
 
             sources_path = f"/usr/local/src/data/ingest-debsrc/gardenlinux/lists/packages.gardenlinux.io_gardenlinux_dists_{self.gl_version}_main_source_Sources"
@@ -155,7 +157,6 @@ class IngestChangelogs:
             logger.info(f"Found {len(parsed_entries)} entries in source index file")
 
             resolved_cves = {}
-
 
             for entry in parsed_entries:
                 logger.info(f"Processing entry: {entry.get('Package', 'unknown')}")
