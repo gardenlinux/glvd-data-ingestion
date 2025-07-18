@@ -56,24 +56,10 @@ python3 -m glvd.cli.data.ingest_debsrc gardenlinux today /usr/local/src/data/ing
 
 
 
-# for version in $GL_VERSIONS_WITH_SOURCE_REPO; do
-#     echo "Run data ingestion (ingest-debsrc - gardenlinux $version)"
-#     python3 -m glvd.cli.data.ingest_debsrc gardenlinux "$version" "/usr/local/src/data/ingest-debsrc/gardenlinux/lists/packages.gardenlinux.io_gardenlinux_dists_${version}_main_source_Sources"
-# done
-
-date -u +%Y-%m-%dT%H:%M:%S%Z
-START_CHANGELOG_1=$(date +%s);
-python3 -m glvd.cli.data.ingest_debsrc gardenlinux 1877.1 "/usr/local/src/data/ingest-debsrc/gardenlinux/lists/packages.gardenlinux.io_gardenlinux_dists_1877.1_main_source_Sources"
-date -u +%Y-%m-%dT%H:%M:%S%Z
-END_CHANGELOG_1=$(date +%s);
-echo $((END_CHANGELOG_1-START_CHANGELOG_1)) | awk '{printf "Duration of changelog 1 import: %d:%02d:%02d\n", $1/3600, ($1/60)%60, $1%60}'
-
-date -u +%Y-%m-%dT%H:%M:%S%Z
-START_CHANGELOG_2=$(date +%s);
-python3 -m glvd.cli.data.ingest_debsrc gardenlinux 1592.7 "/usr/local/src/data/ingest-debsrc/gardenlinux/lists/packages.gardenlinux.io_gardenlinux_dists_1592.7_main_source_Sources"
-date -u +%Y-%m-%dT%H:%M:%S%Z
-END_CHANGELOG_2=$(date +%s);
-echo $((END_CHANGELOG_2-START_CHANGELOG_2)) | awk '{printf "Duration of changelog 1 import: %d:%02d:%02d\n", $1/3600, ($1/60)%60, $1%60}'
+for version in $GL_VERSIONS_WITH_SOURCE_REPO; do
+    echo "Run data ingestion (ingest-debsrc - gardenlinux $version)"
+    python3 -m glvd.cli.data.ingest_debsrc gardenlinux "$version" "/usr/local/src/data/ingest-debsrc/gardenlinux/lists/packages.gardenlinux.io_gardenlinux_dists_${version}_main_source_Sources"
+done
 
 
 
@@ -106,11 +92,27 @@ python3 -m glvd.cli.data.combine_deb
 echo "Run data combination (combine-all)"
 python3 -m glvd.cli.data.combine_all
 
-echo "Ingest changelogs to identify fixed CVEs"
-for version in $GL_VERSIONS_WITH_SOURCE_REPO; do
-    echo "Run data ingestion (ingest_changelogs - gardenlinux $version)"
-    python3 -m glvd.cli.data.ingest_changelogs "$version"
-done
+# echo "Ingest changelogs to identify fixed CVEs"
+# for version in $GL_VERSIONS_WITH_SOURCE_REPO; do
+#     echo "Run data ingestion (ingest_changelogs - gardenlinux $version)"
+#     python3 -m glvd.cli.data.ingest_changelogs "$version"
+# done
+
+date -u +%Y-%m-%dT%H:%M:%S%Z
+START_CHANGELOG_1=$(date +%s);
+echo "Run data ingestion (ingest_changelogs - gardenlinux 1877.1)"
+python3 -m glvd.cli.data.ingest_changelogs 1877.1
+date -u +%Y-%m-%dT%H:%M:%S%Z
+END_CHANGELOG_1=$(date +%s);
+echo $((END_CHANGELOG_1-START_CHANGELOG_1)) | awk '{printf "Duration of changelog 1 import: %d:%02d:%02d\n", $1/3600, ($1/60)%60, $1%60}'
+
+date -u +%Y-%m-%dT%H:%M:%S%Z
+START_CHANGELOG_2=$(date +%s);
+echo "Run data ingestion (ingest_changelogs - gardenlinux 1592.7)"
+python3 -m glvd.cli.data.ingest_changelogs 1592.7
+date -u +%Y-%m-%dT%H:%M:%S%Z
+END_CHANGELOG_2=$(date +%s);
+echo $((END_CHANGELOG_2-START_CHANGELOG_2)) | awk '{printf "Duration of changelog 2 import: %d:%02d:%02d\n", $1/3600, ($1/60)%60, $1%60}'
 
 
 echo "Run kernel CVE ingestion"
