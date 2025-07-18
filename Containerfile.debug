@@ -22,6 +22,10 @@ RUN apt-get update && \
 COPY . /usr/local/src
 COPY keyring.asc /etc/apt/trusted.gpg.d/keyring.asc
 
+# Setup for testing/debugging ingestion of changelogs
+# We need the apt source index files in the right location for this
+RUN mkdir -p /usr/local/src/data/ingest-debsrc/gardenlinux/lists/partial
+RUN for version in $(curl https://gardenlinux-glrd.s3.eu-central-1.amazonaws.com/releases-patch.json |  jq --join-output '.releases[] | select(.attributes.source_repo==true) | "\(.version.major).\(.version.minor) "'); do curl https://packages.gardenlinux.io/gardenlinux/dists/$version/main/source/Sources.gz | gunzip > /usr/local/src/data/ingest-debsrc/gardenlinux/lists/packages.gardenlinux.io_gardenlinux_dists_"$version"_main_source_Sources ; done
 
 # fixme
 RUN pip install --break-system-packages python-debian
