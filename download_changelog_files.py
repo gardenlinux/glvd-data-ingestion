@@ -159,7 +159,7 @@ def download_changelogs(sources_path, gl_version):
 
 
     for entry in parsed_entries:
-        logger.info(f"Processing entry: {entry.get('Package', 'unknown')}")
+        logger.info(f"Processing entry: {entry['Package']} in format {entry['Format']}")
         if entry['Format'] == "3.0 (quilt)":
             debian_tar_xz_file = next((f.split(' ')[2] for f in entry['Files'] if f.endswith('debian.tar.xz')), '')
             download_and_extract_changelog(entry, debian_tar_xz_file, gl_version, '.')
