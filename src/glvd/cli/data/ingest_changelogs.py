@@ -93,9 +93,9 @@ class IngestChangelogs:
                 )
             )
             vulnerable_cves = result.scalars().all()
-            logger.info(f"Vulnerable CVEs for Garden Linux {self.gl_version}: {vulnerable_cves}")
+            # logger.info(f"Vulnerable CVEs for Garden Linux {self.gl_version}: {vulnerable_cves}")
             cve_ids = [cve.cve_id for cve in vulnerable_cves]
-            logger.info(f"Vulnerable CVE IDs for Garden Linux {self.gl_version}: {cve_ids}")
+            # logger.info(f"Vulnerable CVE IDs for Garden Linux {self.gl_version}: {cve_ids}")
 
             # Only act on CVEs that don't have context yet
             # Maybe this condition should be refined, for example to only match those where the status is set to 'resolved'
