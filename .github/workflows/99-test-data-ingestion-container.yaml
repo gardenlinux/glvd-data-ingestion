@@ -32,6 +32,10 @@ jobs:
       if: steps.cache-changelogs.outputs.cache-hit != 'true'
       run: python3 download_changelog_files.py
 
+    - uses: actions/upload-artifact@v4
+      with:
+        name: changelog-files
+        path: changelogs
 
   build-and-test:
     runs-on: ubuntu-latest
@@ -65,11 +69,13 @@ jobs:
         with:
           ref: ${{ inputs.branch }}
 
-      - uses: actions/cache/restore@v4
-        id: cache
+      - uses: actions/download-artifact@v4
         with:
+          name: changelog-files
           path: /changelogs
-          key: debian-source-changelog-files
+
+      - name: Display structure of downloaded files
+        run: ls -R /changelogs
 
       - name: Build and Test
         run: |

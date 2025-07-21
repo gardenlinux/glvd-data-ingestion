@@ -153,6 +153,12 @@ def download_changelogs(sources_path, gl_version):
                 except Exception as e:
                     logger.error(f"Failed to extract or parse changelog for {entry['Package']}: {e}")
                     continue
+        elif entry['Format'] == "3.0 (native)":
+            logger.debug(f"Skipping native format for {entry.get('Package', 'unknown')}")
+            pass
+        elif entry['Format'] == "1.0":
+            logger.debug(f"Skipping format 1.0 for {entry.get('Package', 'unknown')}")
+            pass
 
 
 download_apt_index_files()
