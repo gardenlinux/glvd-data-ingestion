@@ -8,6 +8,30 @@ on:
         description: Branch to test on
 
 jobs:
+
+  download-changelogs:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+
+    - name: Cache Changelogs
+      id: cache-changelogs
+      uses: actions/cache@v4
+      with:
+        path: changelogs
+        key: debian-source-changelog-files
+
+    - run: pip install --break-system-packages python-debian
+
+    - name: Download debian package changelogs
+      if: steps.cache-changelogs.outputs.cache-hit != 'true'
+      run: python3 src/glvd/util/download_changelog_files.py
+
+
   build-and-test:
     runs-on: ubuntu-latest
 
@@ -38,6 +62,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ inputs.branch }}
+
+      - uses: actions/cache/restore@v4
+        id: cache
+        with:
+          path: /changelogs
+          key: debian-source-changelog-files
 
       - name: Build and Test
         run: |
