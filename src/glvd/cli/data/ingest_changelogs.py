@@ -121,6 +121,9 @@ class IngestChangelogs:
 
             # fixme: make this more dynamic/configurable?
             base_dir = "/changelogs"
+            if not os.path.isdir(base_dir):
+                logger.error(f"Changelog directory does not exist: {base_dir}")
+                sys.exit(0)
             parsed = traverse_and_parse_changelogs(base_dir)
             for entry in parsed:
                 logger.info(f"Garden Linux version: {entry['gardenlinux_version']}, File: {entry['filename']}")
