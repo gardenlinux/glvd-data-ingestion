@@ -26,6 +26,7 @@ jobs:
         key: debian-source-changelog-files
 
     - run: pip install --break-system-packages python-debian
+    - run: pip install --break-system-packages .
 
     - name: Download debian package changelogs
       if: steps.cache-changelogs.outputs.cache-hit != 'true'
