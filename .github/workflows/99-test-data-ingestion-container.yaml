@@ -18,18 +18,18 @@ jobs:
       with:
         python-version: '3.13'
 
-    - name: Cache Changelogs
-      id: cache-changelogs
-      uses: actions/cache@v4
-      with:
-        path: changelogs
-        key: debian-source-changelog-files
+    # - name: Cache Changelogs
+    #   id: cache-changelogs
+    #   uses: actions/cache@v4
+    #   with:
+    #     path: changelogs
+    #     key: debian-source-changelog-files
 
     - run: pip install --break-system-packages python-debian
     - run: pip install --break-system-packages .
 
     - name: Download debian package changelogs
-      if: steps.cache-changelogs.outputs.cache-hit != 'true'
+      # if: steps.cache-changelogs.outputs.cache-hit != 'true'
       run: python3 download_changelog_files.py
 
     - uses: actions/upload-artifact@v4

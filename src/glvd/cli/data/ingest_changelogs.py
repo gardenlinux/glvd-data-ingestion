@@ -133,7 +133,7 @@ class IngestChangelogs:
                             for cve in vulnerable_cves:
                                 cve = str.strip(cve.cve_id)
                                 if cve in change:
-                                    add_cve_entry(resolved_cves, cve, entry['Package'], f"Automated triage based on changelog from package {changelog_entry.package} at {changelog_entry.date} in version {changelog_entry.version}:\n{change}")
+                                    add_cve_entry(resolved_cves, cve, cl.package, f"Automated triage based on changelog from package {changelog_entry.package} at {changelog_entry.date} in version {changelog_entry.version}:\n{change}")
 
             # insert all values in resolved_cves into CveContext table
             for cve_id, package_dict in resolved_cves.items():
