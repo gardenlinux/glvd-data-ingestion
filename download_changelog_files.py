@@ -117,7 +117,7 @@ def parse_debian_apt_source_index_file(file_path):
     return results
 
 
-def download_and_extract_changelog(entry, debian_tar_xz_file, gl_version, prefix):
+def download_and_extract_changelog(entry, debian_tar_xz_file, gl_version):
     if debian_tar_xz_file != '':
         url = f"https://packages.gardenlinux.io/gardenlinux/{entry['Directory']}/{debian_tar_xz_file}"
         logger.info(f"Downloading {debian_tar_xz_file} from {url}")
@@ -136,17 +136,18 @@ def download_and_extract_changelog(entry, debian_tar_xz_file, gl_version, prefix
 
         try:
             with tarfile.open(fileobj=io.BytesIO(decompressed)) as tar:
-                changelog_member = tar.getmember("debian/changelog")
-                if prefix != '.':
-                    changelog_member = tar.getmember(f"{prefix}/debian/changelog")
-                changelog_file = tar.extractfile(changelog_member)
-                changelog_content = changelog_file.read().decode("utf-8")
-                changelog_dir = f"changelogs/{gl_version}"
-                os.makedirs(changelog_dir, exist_ok=True)
-                output_filename = f"{changelog_dir}/{entry['Package']}_changelog.txt"
-                with open(output_filename, "w", encoding="utf-8") as out_f:
-                    out_f.write(changelog_content)
-                logger.info(f"Wrote changelog to {output_filename}")
+                
+                for member in tar.getmembers():
+                    if member.name.endswith("debian/changelog"):
+            
+                        changelog_file = tar.extractfile(member)
+                        changelog_content = changelog_file.read().decode("utf-8")
+                        changelog_dir = f"changelogs/{gl_version}"
+                        os.makedirs(changelog_dir, exist_ok=True)
+                        output_filename = f"{changelog_dir}/{entry['Package']}_changelog.txt"
+                        with open(output_filename, "w", encoding="utf-8") as out_f:
+                            out_f.write(changelog_content)
+                        logger.info(f"Wrote changelog to {output_filename}")
 
         except Exception as e:
             logger.error(f"Failed to extract or parse changelog for {entry['Package']}: {e}")
@@ -162,14 +163,11 @@ def download_changelogs(sources_path, gl_version):
         logger.info(f"Processing entry: {entry['Package']} in format {entry['Format']}")
         if entry['Format'] == "3.0 (quilt)":
             debian_tar_xz_file = next((f.split(' ')[2] for f in entry['Files'] if f.endswith('debian.tar.xz')), '')
-            download_and_extract_changelog(entry, debian_tar_xz_file, gl_version, '.')
+            download_and_extract_changelog(entry, debian_tar_xz_file, gl_version)
         elif entry['Format'] == "3.0 (native)":
             # todo make this more robust
             debian_tar_xz_file = next((f.split(' ')[2] for f in entry['Files'] if f.endswith('tar.xz')), '')
-            print(debian_tar_xz_file)
-            print(entry)
-            package_name_version = f"{entry['Package']}_{entry['Version']}"
-            download_and_extract_changelog(entry, debian_tar_xz_file, gl_version, package_name_version)
+            download_and_extract_changelog(entry, debian_tar_xz_file, gl_version)
         elif entry['Format'] == "1.0":
             logger.debug(f"Skipping format 1.0 for {entry.get('Package', 'unknown')}")
             pass
