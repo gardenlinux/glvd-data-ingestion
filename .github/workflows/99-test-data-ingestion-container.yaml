@@ -30,7 +30,7 @@ jobs:
 
     - name: Download debian package changelogs
       if: steps.cache-changelogs.outputs.cache-hit != 'true'
-      run: python3 src/glvd/util/download_changelog_files.py
+      run: python3 download_changelog_files.py
 
 
   build-and-test:
