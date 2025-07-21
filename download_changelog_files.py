@@ -120,7 +120,7 @@ def parse_debian_apt_source_index_file(file_path):
 def download_and_extract_changelog(entry, debian_tar_xz_file, gl_version, prefix):
     if debian_tar_xz_file != '':
         url = f"https://packages.gardenlinux.io/gardenlinux/{entry['Directory']}/{debian_tar_xz_file}"
-        logger.info(f"Downloading debian.tar.xz from {url}")
+        logger.info(f"Downloading {debian_tar_xz_file} from {url}")
         try:
             response = requests.get(url)
             response.raise_for_status()
@@ -138,7 +138,7 @@ def download_and_extract_changelog(entry, debian_tar_xz_file, gl_version, prefix
             with tarfile.open(fileobj=io.BytesIO(decompressed)) as tar:
                 changelog_member = tar.getmember("debian/changelog")
                 if prefix != '.':
-                    pass
+                    changelog_member = tar.getmember(f"{prefix}/debian/changelog")
                 changelog_file = tar.extractfile(changelog_member)
                 changelog_content = changelog_file.read().decode("utf-8")
                 changelog_dir = f"changelogs/{gl_version}"
