@@ -38,16 +38,16 @@ def add_cve_entry(resolved_cves, cve_id, package_name, changelog_text):
         resolved_cves[cve_id][package_name] = []
     resolved_cves[cve_id][package_name].append(changelog_text)
 
-def traverse_and_parse_changelogs(base_dir):
+def traverse_and_parse_changelogs(base_dir, gl_version):
     results = []
     for root, dirs, files in os.walk(base_dir):
         # The gardenlinux version is the last part of the directory path
-        gardenlinux_version = os.path.basename(root)
+        # gardenlinux_version = os.path.basename(root)
         for file in files:
             if file.endswith("_changelog.txt"):
                 filepath = os.path.join(root, file)
                 results.append({
-                    "gardenlinux_version": gardenlinux_version,
+                    "gardenlinux_version": gl_version,
                     "filename": file,
                     "filepath": filepath,
                 })
@@ -120,11 +120,11 @@ class IngestChangelogs:
             resolved_cves = {}
 
             # fixme: make this more dynamic/configurable?
-            base_dir = "/changelogs"
+            base_dir = f"/changelogs/{self.gl_version}"
             if not os.path.isdir(base_dir):
                 logger.error(f"Changelog directory does not exist: {base_dir}")
                 sys.exit(0)
-            parsed = traverse_and_parse_changelogs(base_dir)
+            parsed = traverse_and_parse_changelogs(base_dir, self.gl_version)
             for entry in parsed:
                 logger.info(f"Garden Linux version: {entry['gardenlinux_version']}, File: {entry['filename']}")
 
