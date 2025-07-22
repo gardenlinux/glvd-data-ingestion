@@ -1,11 +1,9 @@
 import logging
-from debian import changelog
 import requests
 import lzma
 import tarfile
 import io
 import re
-import json
 import gzip
 import os
 import shutil
@@ -16,7 +14,8 @@ logging.basicConfig(
     level=logging.DEBUG,
     format="%(asctime)s [%(levelname)s] %(message)s"
 )
-logger = logging.getLogger(__name__)
+
+logger = logging.getLogger('download_changelog_files')
 
 
 def download_apt_index_files():

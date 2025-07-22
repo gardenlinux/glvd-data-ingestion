@@ -96,7 +96,7 @@ python3 -m glvd.cli.data.combine_all
 echo "Ingest changelogs to identify fixed CVEs"
 export GL_VERSIONS_WITH_SOURCE_REPO
 echo $GL_VERSIONS_WITH_SOURCE_REPO | tr ' ' '\n' | parallel -j $(nproc) \
-  'python3 -m cProfile -o ingest_changelogs_{}.prof -m glvd.cli.data.ingest_changelogs {}'
+  'python3 -m glvd.cli.data.ingest_changelogs {}'
 
 # date -u +%Y-%m-%dT%H:%M:%S%Z
 # START_CHANGELOG_1=$(date +%s);
