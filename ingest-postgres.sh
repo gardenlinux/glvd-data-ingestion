@@ -92,28 +92,17 @@ python3 -m glvd.cli.data.combine_deb
 echo "Run data combination (combine-all)"
 python3 -m glvd.cli.data.combine_all
 
-# Run in parallel because this puts heavy load on a single cpu core
 echo "Ingest changelogs to identify fixed CVEs"
-export GL_VERSIONS_WITH_SOURCE_REPO
-echo $GL_VERSIONS_WITH_SOURCE_REPO | tr ' ' '\n' | parallel -j $(nproc) \
-  'python3 -m glvd.cli.data.ingest_changelogs {}'
-
-# date -u +%Y-%m-%dT%H:%M:%S%Z
-# START_CHANGELOG_1=$(date +%s);
-# echo "Run data ingestion (ingest_changelogs - gardenlinux 1877.1)"
-# python3 -m glvd.cli.data.ingest_changelogs 1877.1
-# date -u +%Y-%m-%dT%H:%M:%S%Z
-# END_CHANGELOG_1=$(date +%s);
-# echo $((END_CHANGELOG_1-START_CHANGELOG_1)) | awk '{printf "Duration of changelog 1 import: %d:%02d:%02d\n", $1/3600, ($1/60)%60, $1%60}'
-
-# date -u +%Y-%m-%dT%H:%M:%S%Z
-# START_CHANGELOG_2=$(date +%s);
-# echo "Run data ingestion (ingest_changelogs - gardenlinux 1592.7)"
-# python3 -m glvd.cli.data.ingest_changelogs 1592.7
-# date -u +%Y-%m-%dT%H:%M:%S%Z
-# END_CHANGELOG_2=$(date +%s);
-# echo $((END_CHANGELOG_2-START_CHANGELOG_2)) | awk '{printf "Duration of changelog 2 import: %d:%02d:%02d\n", $1/3600, ($1/60)%60, $1%60}'
-
+for version in $GL_VERSIONS_WITH_SOURCE_REPO; do
+    date -u +%Y-%m-%dT%H:%M:%S%Z
+    START_CHANGELOG=$(date +%s);
+    echo "Run changelog ingestion (ingest_changelogs - gardenlinux $version)"
+    python3 -m glvd.cli.data.ingest_changelogs "$version"
+    date -u +%Y-%m-%dT%H:%M:%S%Z
+    END_CHANGELOG=$(date +%s);
+    echo "-- CHANGELOG IMPORT PERFORMANCE MEASUREMENT for $version --"
+    echo $((END_CHANGELOG-START_CHANGELOG)) | awk '{printf "Duration of changelog import: %d:%02d:%02d\n", $1/3600, ($1/60)%60, $1%60}'
+done
 
 echo "Run kernel CVE ingestion"
 python3 -m glvd.cli.data.ingest_kernel vulns/cve/published/
