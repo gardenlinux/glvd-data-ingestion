@@ -101,6 +101,8 @@ class IngestChangelogs:
             # Maybe this condition should be refined, for example to only match those where the status is set to 'resolved'
             existing_cve_ids = {ctx.cve_id for ctx in cve_contexts}
             cve_ids = [cve_id for cve_id in cve_ids if cve_id not in existing_cve_ids]
+            
+            seen_changelogs = []
 
             dist_id = None
             result = await session.execute(
@@ -118,6 +120,11 @@ class IngestChangelogs:
                 sys.exit(1)
 
             resolved_cves = {}
+
+            # it should be possible to avoid loads of duplicated work here if we cache which chanelog entry resolves which cve
+            # there is a huge overlap in this between the different versions, so the bulk of the work would only needed to be done once
+            # questions: where would we store such a cache? in the db? on 'disk' in the container?
+            # would it make sense to keep this data for longer?
 
             # fixme: make this more dynamic/configurable?
             base_dir = f"/changelogs/{self.gl_version}"
