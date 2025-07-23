@@ -29,8 +29,7 @@ jobs:
     - run: pip install --break-system-packages .
 
     - name: Download debian package changelogs
-    # fixme temporarily disable for development
-      # if: steps.cache-changelogs.outputs.cache-hit != 'true'
+      if: steps.cache-changelogs.outputs.cache-hit != 'true'
       run: python3 download_changelog_files.py
 
     - uses: actions/upload-artifact@v4
