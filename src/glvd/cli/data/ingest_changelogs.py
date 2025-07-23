@@ -163,7 +163,7 @@ class IngestChangelogs:
                                     cve = str.strip(cve.cve_id)
                                     if cve in change:
                                         add_cve_entry(resolved_cves, cve, cl.package, f"Automated triage based on changelog from package {changelog_entry.package} at {changelog_entry.date} in version {changelog_entry.version}:\n{change}")
-                                        if not seen_changelogs[sha256]:
+                                        if not seen_changelogs.get(sha256):
                                             seen_changelogs[sha256] = []
                                         seen_changelogs[sha256].append(cve, cl.package, f"Automated triage based on changelog from package {changelog_entry.package} at {changelog_entry.date} in version {changelog_entry.version}:\n{change}")
 
