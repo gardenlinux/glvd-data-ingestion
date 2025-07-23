@@ -8,6 +8,7 @@ import gzip
 import os
 import shutil
 import tempfile
+import hashlib
 
 # Setup logging
 logging.basicConfig(
@@ -147,6 +148,13 @@ def download_and_extract_changelog(entry, debian_tar_xz_file, gl_version):
                         with open(output_filename, "w", encoding="utf-8") as out_f:
                             out_f.write(changelog_content)
                         logger.info(f"Wrote changelog to {output_filename}")
+
+                        # Write sha256 sum file
+                        sha256sum = hashlib.sha256(changelog_content.encode("utf-8")).hexdigest()
+                        sha256_filename = f"{output_filename}.sha256"
+                        with open(sha256_filename, "w", encoding="utf-8") as sha_f:
+                            sha_f.write(sha256sum)
+                        logger.info(f"Wrote sha256 sum to {sha256_filename}")
 
         except Exception as e:
             logger.error(f"Failed to extract or parse changelog for {entry['Package']}: {e}")

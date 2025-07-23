@@ -25,9 +25,12 @@ from sqlalchemy.ext.asyncio import (
 from glvd.database import CveContext, DebCve, DistCpe
 from . import cli
 import sys
+import hashlib
+import json
 
 
 logger = logging.getLogger("ingest_changelogs")
+cache_path = "/changelogs/cache.json"
 
 
 def add_cve_entry(resolved_cves, cve_id, package_name, changelog_text):
@@ -102,7 +105,15 @@ class IngestChangelogs:
             existing_cve_ids = {ctx.cve_id for ctx in cve_contexts}
             cve_ids = [cve_id for cve_id in cve_ids if cve_id not in existing_cve_ids]
             
-            seen_changelogs = []
+            seen_changelogs = {}
+            if os.path.exists(cache_path):
+                try:
+                    with open(cache_path, "r") as cache_file:
+                        seen_changelogs = json.load(cache_file)
+                    logger.info(f"Loaded seen_changelogs cache from {cache_path}")
+                except Exception as e:
+                    logger.error(f"Failed to load seen_changelogs cache: {e}")
+
 
             dist_id = None
             result = await session.execute(
@@ -137,13 +148,33 @@ class IngestChangelogs:
 
                 with open(entry['filepath'], 'r') as f:
                     content = f.read()
-                    cl = changelog.Changelog(content)
-                    for changelog_entry in cl:
-                        for change in changelog_entry.changes():
-                            for cve in vulnerable_cves:
-                                cve = str.strip(cve.cve_id)
-                                if cve in change:
-                                    add_cve_entry(resolved_cves, cve, cl.package, f"Automated triage based on changelog from package {changelog_entry.package} at {changelog_entry.date} in version {changelog_entry.version}:\n{change}")
+                    sha256 = hashlib.sha256(content.encode('utf-8')).hexdigest()
+                    logger.info(f"SHA256 of {entry['filename']}: {sha256}")
+                    
+                    if seen_changelogs.get(sha256):
+                        logger.info(f'xx have {len(seen_changelogs.get(sha256))} cached entries')
+                        for cached_entry in seen_changelogs.get(sha256):
+                            add_cve_entry(resolved_cves, cached_entry[0], cached_entry[1], cached_entry[2])
+                    else:
+                        cl = changelog.Changelog(content)
+                        for changelog_entry in cl:
+                            for change in changelog_entry.changes():
+                                for cve in vulnerable_cves:
+                                    cve = str.strip(cve.cve_id)
+                                    if cve in change:
+                                        add_cve_entry(resolved_cves, cve, cl.package, f"Automated triage based on changelog from package {changelog_entry.package} at {changelog_entry.date} in version {changelog_entry.version}:\n{change}")
+                                        if not seen_changelogs[sha256]:
+                                            seen_changelogs[sha256] = []
+                                        seen_changelogs[sha256].append(cve, cl.package, f"Automated triage based on changelog from package {changelog_entry.package} at {changelog_entry.date} in version {changelog_entry.version}:\n{change}")
+
+            try:
+                # Convert keys to strings for JSON serialization
+                serializable_seen_changelogs = {str(k): v for k, v in seen_changelogs.items()}
+                with open(cache_path, "w") as cache_file:
+                    json.dump(serializable_seen_changelogs, cache_file, indent=2)
+                logger.info(f"Written seen_changelogs cache to {cache_path}")
+            except Exception as e:
+                logger.error(f"Failed to write seen_changelogs cache: {e}")
 
             # insert all values in resolved_cves into CveContext table
             for cve_id, package_dict in resolved_cves.items():
