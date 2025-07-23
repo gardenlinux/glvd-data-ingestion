@@ -154,7 +154,7 @@ class IngestChangelogs:
                     if seen_changelogs.get(sha256):
                         logger.info(f'xx have {len(seen_changelogs.get(sha256))} cached entries')
                         for cached_entry in seen_changelogs.get(sha256):
-                            add_cve_entry(resolved_cves, cached_entry[0], cached_entry[1], cached_entry[2])
+                            add_cve_entry(resolved_cves, cached_entry['cve'], cached_entry['package'], cached_entry['message'])
                     else:
                         cl = changelog.Changelog(content)
                         for changelog_entry in cl:
@@ -165,7 +165,10 @@ class IngestChangelogs:
                                         add_cve_entry(resolved_cves, cve, cl.package, f"Automated triage based on changelog from package {changelog_entry.package} at {changelog_entry.date} in version {changelog_entry.version}:\n{change}")
                                         if not seen_changelogs.get(sha256):
                                             seen_changelogs[sha256] = []
-                                        seen_changelogs[sha256].append(cve, cl.package, f"Automated triage based on changelog from package {changelog_entry.package} at {changelog_entry.date} in version {changelog_entry.version}:\n{change}")
+                                        seen_changelogs[sha256].append(
+                                            {
+                                            'cve': cve, 'package': cl.package, 'message': f"Automated triage based on changelog from package {changelog_entry.package} at {changelog_entry.date} in version {changelog_entry.version}:\n{change}"
+                                            })
 
             try:
                 # Convert keys to strings for JSON serialization
