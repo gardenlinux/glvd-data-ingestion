@@ -6,11 +6,6 @@ import asyncio
 import logging
 from pathlib import Path
 from sqlalchemy import select
-import re
-import requests
-import lzma
-import tarfile
-import io
 import os
 from debian import changelog
 
@@ -76,7 +71,6 @@ class IngestChangelogs:
     def __init__(self, gl_version: Path) -> None:
         self.gl_version = gl_version
 
-
     async def __call__(
         self,
         engine: AsyncEngine,
@@ -96,15 +90,13 @@ class IngestChangelogs:
                 )
             )
             vulnerable_cves = result.scalars().all()
-            # logger.info(f"Vulnerable CVEs for Garden Linux {self.gl_version}: {vulnerable_cves}")
             cve_ids = [cve.cve_id for cve in vulnerable_cves]
-            # logger.info(f"Vulnerable CVE IDs for Garden Linux {self.gl_version}: {cve_ids}")
 
             # Only act on CVEs that don't have context yet
             # Maybe this condition should be refined, for example to only match those where the status is set to 'resolved'
             existing_cve_ids = {ctx.cve_id for ctx in cve_contexts}
             cve_ids = [cve_id for cve_id in cve_ids if cve_id not in existing_cve_ids]
-            
+
             seen_changelogs = {}
             if os.path.exists(cache_path):
                 try:
@@ -113,7 +105,6 @@ class IngestChangelogs:
                     logger.info(f"Loaded seen_changelogs cache from {cache_path}")
                 except Exception as e:
                     logger.error(f"Failed to load seen_changelogs cache: {e}")
-
 
             dist_id = None
             result = await session.execute(
@@ -132,12 +123,6 @@ class IngestChangelogs:
 
             resolved_cves = {}
 
-            # it should be possible to avoid loads of duplicated work here if we cache which chanelog entry resolves which cve
-            # there is a huge overlap in this between the different versions, so the bulk of the work would only needed to be done once
-            # questions: where would we store such a cache? in the db? on 'disk' in the container?
-            # would it make sense to keep this data for longer?
-
-            # fixme: make this more dynamic/configurable?
             base_dir = f"/changelogs/{self.gl_version}"
             if not os.path.isdir(base_dir):
                 logger.error(f"Changelog directory does not exist: {base_dir}")
@@ -150,25 +135,29 @@ class IngestChangelogs:
                     content = f.read()
                     sha256 = hashlib.sha256(content.encode('utf-8')).hexdigest()
                     logger.info(f"SHA256 of {entry['filename']}: {sha256}")
-                    
+
                     if seen_changelogs.get(sha256):
-                        logger.info(f'xx have {len(seen_changelogs.get(sha256))} cached entries')
+                        logger.info(
+                            f"We have {len(seen_changelogs.get(sha256))} cached entries for {entry['filename']} with sha256 {sha256}"
+                        )
                         for cached_entry in seen_changelogs.get(sha256):
                             add_cve_entry(resolved_cves, cached_entry['cve'], cached_entry['package'], cached_entry['message'])
                     else:
                         cl = changelog.Changelog(content)
                         for changelog_entry in cl:
                             for change in changelog_entry.changes():
-                                for cve in vulnerable_cves:
-                                    cve = str.strip(cve.cve_id)
+                                for cve in cve_ids:
                                     if cve in change:
                                         add_cve_entry(resolved_cves, cve, cl.package, f"Automated triage based on changelog from package {changelog_entry.package} at {changelog_entry.date} in version {changelog_entry.version}:\n{change}")
                                         if not seen_changelogs.get(sha256):
                                             seen_changelogs[sha256] = []
                                         seen_changelogs[sha256].append(
                                             {
-                                            'cve': cve, 'package': cl.package, 'message': f"Automated triage based on changelog from package {changelog_entry.package} at {changelog_entry.date} in version {changelog_entry.version}:\n{change}"
-                                            })
+                                                "cve": cve,
+                                                "package": cl.package,
+                                                "message": f"Automated triage based on changelog from package {changelog_entry.package} at {changelog_entry.date} in version {changelog_entry.version}:\n{change}",
+                                            }
+                                        )
 
             try:
                 # Convert keys to strings for JSON serialization
