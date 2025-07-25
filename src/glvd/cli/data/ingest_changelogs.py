@@ -39,8 +39,6 @@ def add_cve_entry(resolved_cves, cve_id, package_name, changelog_text):
 def traverse_and_parse_changelogs(base_dir, gl_version):
     results = []
     for root, dirs, files in os.walk(base_dir):
-        # The gardenlinux version is the last part of the directory path
-        # gardenlinux_version = os.path.basename(root)
         for file in files:
             if file.endswith("_changelog.txt"):
                 filepath = os.path.join(root, file)
@@ -81,7 +79,7 @@ class IngestChangelogs:
                 select(CveContext).where(CveContext.gardenlinux_version == str(self.gl_version))
             )
             cve_contexts = result.scalars().all()
-            logger.info(f"Loaded CVE contexts for Garden Linux {self.gl_version}: {cve_contexts}")
+            logger.info(f"Number of loaded CVE contexts for Garden Linux {self.gl_version}: {len(cve_contexts)}")
 
             result = await session.execute(
                 select(DebCve).where(
@@ -91,11 +89,13 @@ class IngestChangelogs:
             )
             vulnerable_cves = result.scalars().all()
             cve_ids = [cve.cve_id for cve in vulnerable_cves]
+            logger.info(f"Have {len(cve_id)} CVEs for Garden Linux {self.gl_version}")
 
             # Only act on CVEs that don't have context yet
             # Maybe this condition should be refined, for example to only match those where the status is set to 'resolved'
             existing_cve_ids = {ctx.cve_id for ctx in cve_contexts}
             cve_ids = [cve_id for cve_id in cve_ids if cve_id not in existing_cve_ids]
+            logger.info(f"Processing {len(cve_id)} CVEs without triage information for Garden Linux {self.gl_version}")
 
             seen_changelogs = {}
             if os.path.exists(cache_path):
