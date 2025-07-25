@@ -8,8 +8,38 @@ on:
         description: Branch to test on
 
 jobs:
+
+  download-changelogs:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+
+    - name: Cache Changelogs
+      id: cache-changelogs
+      uses: actions/cache@v4
+      with:
+        path: changelogs
+        key: debian-source-changelog-files
+
+    - run: pip install --break-system-packages python-debian
+    - run: pip install --break-system-packages .
+
+    - name: Download debian package changelogs
+      if: steps.cache-changelogs.outputs.cache-hit != 'true'
+      run: python3 download_changelog_files.py
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: changelog-files
+        path: changelogs
+
   build-and-test:
     runs-on: ubuntu-latest
+    needs: download-changelogs
 
     services:
       postgres:
@@ -39,10 +69,18 @@ jobs:
         with:
           ref: ${{ inputs.branch }}
 
+      - uses: actions/download-artifact@v4
+        with:
+          name: changelog-files
+          path: changelogs
+
+      - name: Display structure of downloaded files
+        run: ls -R changelogs
+
       - name: Build and Test
         run: |
           docker build -t data-ingestion-test -f Containerfile .
-          docker run --network=host --name=data-ingestion-test --env PGUSER --env PGDATABASE --env PGPASSWORD --env PGHOST --env PGPORT data-ingestion-test \
+          docker run --network=host --name=data-ingestion-test --volume $PWD/changelogs:/changelogs --env PGUSER --env PGDATABASE --env PGPASSWORD --env PGHOST --env PGPORT data-ingestion-test \
             bash -c "/usr/local/src/container-ci.sh"
           docker cp data-ingestion-test:/tmp/glvd-dump.sql ./glvd-dump.sql
           docker cp data-ingestion-test:/tmp/glvd-schema.sql ./glvd-schema.sql

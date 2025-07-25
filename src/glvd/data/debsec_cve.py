@@ -6,6 +6,7 @@ import re
 from typing import TextIO
 
 from ..database import DebsecCve
+from glvd.util.minor import extract_minor
 
 
 class DebsecCveFile(dict[str, dict[tuple[str, str], DebsecCve]]):
@@ -45,6 +46,7 @@ class DebsecCveFile(dict[str, dict[tuple[str, str], DebsecCve]]):
             dist=None,
             deb_source=match['source'],
             deb_version_fixed=match['version_fixed'],
+            minor_deb_version_fixed=extract_minor(match['version_fixed']),
             debsec_tag=tag,
             debsec_note=match['note'],
         )

@@ -3,3 +3,5 @@ venv
 package-list*
 working-data/*
 pgformatter.tgz
+changelogs
+lists
