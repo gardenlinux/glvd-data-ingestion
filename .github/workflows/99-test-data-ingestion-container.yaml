@@ -18,12 +18,20 @@ jobs:
       with:
         python-version: '3.13'
 
+    # Use week as the cache key to balance the desire to avoid double work
+    # with the requirement to get updated changelogs on a regular basis.
+    - name: Get Week Number
+      id: get-date
+      run: |
+        echo "date=$(/bin/date -u "+%V")" >> $GITHUB_OUTPUT
+      shell: bash
+
     - name: Cache Changelogs
       id: cache-changelogs
       uses: actions/cache@v4
       with:
         path: changelogs
-        key: debian-source-changelog-files
+        key: debian-source-changelog-files-week-${{ steps.get-date.outputs.date }}
 
     - run: pip install --break-system-packages python-debian
     - run: pip install --break-system-packages .
