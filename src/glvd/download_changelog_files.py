@@ -1,6 +1,7 @@
 import logging
 import requests
 import lzma
+import bz2
 import tarfile
 import io
 import re
@@ -119,10 +120,10 @@ def parse_debian_apt_source_index_file(file_path):
     return results
 
 
-def download_and_extract_changelog(entry, debian_tar_xz_file, gl_version):
-    if debian_tar_xz_file != '':
-        url = f"https://packages.gardenlinux.io/gardenlinux/{entry['Directory']}/{debian_tar_xz_file}"
-        logger.info(f"Downloading {debian_tar_xz_file} from {url}")
+def download_and_extract_changelog(entry, debian_source_tarball, gl_version):
+    if debian_source_tarball != '':
+        url = f"https://packages.gardenlinux.io/gardenlinux/{entry['Directory']}/{debian_source_tarball}"
+        logger.info(f"Downloading {debian_source_tarball} from {url}")
         try:
             response = requests.get(url)
             response.raise_for_status()
@@ -131,9 +132,15 @@ def download_and_extract_changelog(entry, debian_tar_xz_file, gl_version):
             return
 
         try:
-            decompressed = lzma.decompress(response.content)
+            if debian_source_tarball.endswith('.tar.xz'):
+                decompressed = lzma.decompress(response.content)
+            elif debian_source_tarball.endswith('.tar.bz2'):
+                decompressed = bz2.decompress(response.content)
+            else:
+                logger.error(f"Unknown archive format for {debian_source_tarball}")
+                return
         except Exception as e:
-            logger.error(f"Failed to decompress xz file for {entry['Package']}: {e}")
+            logger.error(f"Failed to decompress archive for {entry['Package']}: {e}")
             return
 
         try:
@@ -172,20 +179,20 @@ def download_changelogs(sources_path, gl_version):
         logger.info(f"Processing entry: {entry['Package']} in format {entry['Format']}")
         if entry['Format'] == "3.0 (quilt)":
             # entry['Files'] will contain a .dsc file, an orig tarball and a debian tarball with the debian-folder and the changelog
-            debian_tar_xz_file = ''
+            debian_source_tarball = ''
             for f in entry['Files']:
                 if f.endswith('debian.tar.xz') or f.endswith('debian.tar.bz2'):
-                    debian_tar_xz_file = f.split(' ')[2]
+                    debian_source_tarball = f.split(' ')[2]
                     break
-            download_and_extract_changelog(entry, debian_tar_xz_file, gl_version)
+            download_and_extract_changelog(entry, debian_source_tarball, gl_version)
         elif entry['Format'] == "3.0 (native)":
             # entry['Files'] will contain a .dsc file and a tarball with the actual sources and changelog
-            debian_tar_xz_file = ''
+            debian_source_tarball = ''
             for f in entry['Files']:
                 if f.endswith('tar.xz') or f.endswith('tar.bz2'):
-                    debian_tar_xz_file = f.split(' ')[2]
+                    debian_source_tarball = f.split(' ')[2]
                     break
-            download_and_extract_changelog(entry, debian_tar_xz_file, gl_version)
+            download_and_extract_changelog(entry, debian_source_tarball, gl_version)
         elif entry['Format'] == "1.0":
             # Skipping 1.0 format on purpose, because:
             # this affects only a small number of packages, some of them are self-built by us,
