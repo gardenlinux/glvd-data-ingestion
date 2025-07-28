@@ -10,6 +10,8 @@ import shutil
 import tempfile
 import hashlib
 
+# todo: move - utils
+
 # Setup logging
 logging.basicConfig(
     level=logging.DEBUG,
@@ -169,13 +171,26 @@ def download_changelogs(sources_path, gl_version):
     for entry in parsed_entries:
         logger.info(f"Processing entry: {entry['Package']} in format {entry['Format']}")
         if entry['Format'] == "3.0 (quilt)":
-            debian_tar_xz_file = next((f.split(' ')[2] for f in entry['Files'] if f.endswith('debian.tar.xz')), '')
+            # entry['Files'] will contain a .dsc file, an orig tarball and a debian tarball with the debian-folder and the changelog
+            debian_tar_xz_file = ''
+            for f in entry['Files']:
+                if f.endswith('debian.tar.xz') or f.endswith('debian.tar.bz2'):
+                    debian_tar_xz_file = f.split(' ')[2]
+                    break
             download_and_extract_changelog(entry, debian_tar_xz_file, gl_version)
         elif entry['Format'] == "3.0 (native)":
-            # todo make this more robust
-            debian_tar_xz_file = next((f.split(' ')[2] for f in entry['Files'] if f.endswith('tar.xz')), '')
+            # entry['Files'] will contain a .dsc file and a tarball with the actual sources and changelog
+            debian_tar_xz_file = ''
+            for f in entry['Files']:
+                if f.endswith('tar.xz') or f.endswith('tar.bz2'):
+                    debian_tar_xz_file = f.split(' ')[2]
+                    break
             download_and_extract_changelog(entry, debian_tar_xz_file, gl_version)
         elif entry['Format'] == "1.0":
+            # Skipping 1.0 format on purpose, because:
+            # this affects only a small number of packages, some of them are self-built by us,
+            # and the others don't have much use in Garden Linux such as xorg* or wayland packages,
+            # and also there seems to be no standard way to locate the changelog in this format
             logger.debug(f"Skipping format 1.0 for {entry.get('Package', 'unknown')}")
             pass
 
