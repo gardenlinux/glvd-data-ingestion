@@ -89,13 +89,13 @@ class IngestChangelogs:
             )
             vulnerable_cves = result.scalars().all()
             cve_ids = [cve.cve_id for cve in vulnerable_cves]
-            logger.info(f"Have {len(cve_id)} CVEs for Garden Linux {self.gl_version}")
+            logger.info(f"Have {len(cve_ids)} CVEs for Garden Linux {self.gl_version}")
 
             # Only act on CVEs that don't have context yet
             # Maybe this condition should be refined, for example to only match those where the status is set to 'resolved'
             existing_cve_ids = {ctx.cve_id for ctx in cve_contexts}
             cve_ids = [cve_id for cve_id in cve_ids if cve_id not in existing_cve_ids]
-            logger.info(f"Processing {len(cve_id)} CVEs without triage information for Garden Linux {self.gl_version}")
+            logger.info(f"Processing {len(cve_ids)} CVEs without triage information for Garden Linux {self.gl_version}")
 
             seen_changelogs = {}
             if os.path.exists(cache_path):
