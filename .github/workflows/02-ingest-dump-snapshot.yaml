@@ -35,7 +35,7 @@ jobs:
 
     - name: Download debian package changelogs
       if: steps.cache-changelogs.outputs.cache-hit != 'true'
-      run: python3 download_changelog_files.py
+      run: python3 src/glvd/download_changelog_files.py
 
     - name: Upload changelog-files
       uses: actions/upload-artifact@v4
