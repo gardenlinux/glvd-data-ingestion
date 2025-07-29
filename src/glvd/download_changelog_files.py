@@ -201,5 +201,5 @@ def download_changelogs(sources_path, gl_version):
             logger.debug(f"Skipping format 1.0 for {entry.get('Package', 'unknown')}")
             pass
 
-
-download_apt_index_files()
+if __name__ == '__main__':
+    download_apt_index_files()
