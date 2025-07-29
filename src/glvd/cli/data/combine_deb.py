@@ -46,7 +46,14 @@ class CombineDeb:
                     , debsrc.deb_source
                     , debsrc.deb_version
                     , debsec_cve.deb_version_fixed
-                    , COALESCE(debsrc.deb_version < debsec_cve.deb_version_fixed, TRUE) AS debsec_vulnerable
+                    , (
+                        COALESCE(debsrc.deb_version < debsec_cve.deb_version_fixed, TRUE)
+                        OR (
+                            debsrc.minor_deb_version IS NOT NULL
+                            AND debsec_cve.minor_deb_version_fixed IS NOT NULL
+                            AND debsrc.minor_deb_version <> debsec_cve.minor_deb_version_fixed
+                        )
+                    ) AS debsec_vulnerable
                     , debsec_note
                 FROM
                     debsrc

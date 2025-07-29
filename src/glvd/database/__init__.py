@@ -77,6 +77,7 @@ class Debsrc(Base):
     last_mod: Mapped[datetime] = mapped_column(init=False, server_default=func.now(), onupdate=func.now())
     deb_source: Mapped[str] = mapped_column(primary_key=True)
     deb_version: Mapped[str] = mapped_column(DebVersion)
+    minor_deb_version: Mapped[str] = mapped_column(Text)
 
     dist: Mapped[Optional[DistCpe]] = relationship(lazy='selectin', default=None)
 
@@ -93,6 +94,7 @@ class DebsecCve(Base):
     last_mod: Mapped[datetime] = mapped_column(init=False, server_default=func.now(), onupdate=func.now())
     deb_source: Mapped[str] = mapped_column(primary_key=True)
     deb_version_fixed: Mapped[Optional[str]] = mapped_column(DebVersion, default=None)
+    minor_deb_version_fixed: Mapped[Optional[str]] = mapped_column(default=None)
     debsec_tag: Mapped[Optional[str]] = mapped_column(default=None)
     debsec_note: Mapped[Optional[str]] = mapped_column(default=None)
 
@@ -147,6 +149,16 @@ class AllCve(Base):
 
     def merge(self, other: Self) -> None:
         self.data = other.data
+
+class CveContext(Base):
+    __tablename__ = 'cve_context'
+
+    cve_id = Column(Text, primary_key=True, nullable=False)
+    gardenlinux_version = Column(Text)
+    is_resolved = Column(Boolean, nullable=False)
+    description = Column(Text)
+    use_case = Column(Text)
+    dist_id = mapped_column(ForeignKey(DistCpe.id), primary_key=True)
 
 class CveContextKernel(Base):
     __tablename__ = 'cve_context_kernel'

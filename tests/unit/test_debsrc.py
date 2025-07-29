@@ -6,6 +6,7 @@ def test_can_parse_debsrc_file():
     expected = {
         'glibc': Debsrc(deb_source='glibc',
                         deb_version='2.41-6',
+                        minor_deb_version='2.41',
                         dist=None)
     }
 
