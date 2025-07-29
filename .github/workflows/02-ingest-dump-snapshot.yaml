@@ -81,7 +81,7 @@ jobs:
 
       # fixme: /changelogs is the expected location in ingest_changelogs.py
       # should be configurable
-      - run: sudo ln -s $PWD/changelogs /changelogs
+      - run: ln -s $PWD/changelogs /changelogs
 
       - name: Display structure of changelog-files
         run: ls -R changelogs
