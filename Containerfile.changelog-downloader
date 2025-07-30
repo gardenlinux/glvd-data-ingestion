@@ -1,0 +1,9 @@
+FROM python:3
+
+WORKDIR /usr/src/app
+
+RUN pip install --break-system-packages python-debian requests
+
+COPY src/glvd/download_changelog_files.py download_changelog_files.py
+
+CMD [ "python", "./download_changelog_files.py" ]
