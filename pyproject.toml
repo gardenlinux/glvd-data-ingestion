@@ -18,7 +18,7 @@ python = ">=3.11"
 asyncpg = ">=0.28"
 requests = ">=2"
 SQLAlchemy = "^2"
-greenlet = "^3.2.3"
+greenlet = "^3.2.4"
 python-debian = "^1.0.1"
 
 [tool.poetry.group.dev.dependencies]
