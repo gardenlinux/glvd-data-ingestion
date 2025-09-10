@@ -17,7 +17,9 @@ then
 fi;
 
 files=$(find $1 -iname "*.sql" | sort); #| xargs printf -- '-f %s\n' | xargs psql $DATABASE_URL -1 -v ON_ERROR_STOP=1;
+set +e
 for file in $files;
 do
+  echo "Applying migration $file"
   psql $DATABASE_URL -1 -v ON_ERROR_STOP=1 -f $file;
 done;
