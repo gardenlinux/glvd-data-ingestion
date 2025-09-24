@@ -35,7 +35,7 @@ irrelevant_subsystems = [
     "afs",
     "xen",
     "x86/hyperv",
-    "wifi",
+    "drivers/net/wireless",
     "video/",
     "staging",
     "drm",
@@ -92,6 +92,7 @@ irrelevant_subsystems = [
     "sound",
     "drivers/soc/samsung",
     "drivers/hsi",
+    "marvell/cesa",
 ]
 
 
