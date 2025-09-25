@@ -1,6 +1,8 @@
 name: 02 - Dump GLVD Postgres Snapshot to sql file
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '0 3 * * 1'
 
 jobs:
 
@@ -111,16 +113,16 @@ jobs:
         with:
           name: glvd.sql
           path: glvd.sql
-          retention-days: 7
+          retention-days: 8
 
       - uses: actions/upload-artifact@v4
         with:
           name: glvd-schema.sql
           path: glvd-schema.sql
-          retention-days: 7
+          retention-days: 8
 
       - uses: actions/upload-artifact@v4
         with:
           name: dist_cpe.csv
           path: dist_cpe.csv
-          retention-days: 7
+          retention-days: 8
