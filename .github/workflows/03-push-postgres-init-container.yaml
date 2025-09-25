@@ -2,6 +2,8 @@ name: 03 - Build and Push Container to init GLVD Postgres DB
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '30 5 * * 1'
 
 permissions:
   # Checkout repository
