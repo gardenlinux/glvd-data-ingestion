@@ -6,6 +6,7 @@ Currently, data for the following distributions is collected:
 * Debian Bulleye
 * Debian Bookworm
 * Debian Trixie
+* Debian Forky
 * Garden Linux today
 
 ## Dev setup

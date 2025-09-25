@@ -48,6 +48,7 @@ class DistCpeMapperDebian(DistCpeMapper):
             'bookworm': '12',
             'trixie': '13',
             'forky': '14',
+            'duke': '15',
             '': '',
         }[codename]
         return DistCpe(
