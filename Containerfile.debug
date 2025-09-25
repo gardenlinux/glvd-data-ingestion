@@ -14,7 +14,7 @@ ENV PGPORT=5432
 ENV PGHOST=glvd-postgres
 
 RUN apt-get update && \
-    apt-get upgrade -y --no-install-recommends python3-asyncpg python3-pip python3-poetry-core python3-requests python3-sqlalchemy/unstable && \
+    apt-get upgrade -y --no-install-recommends python3-asyncpg python3-pip python3-poetry-core python3-requests python3-sqlalchemy && \
     apt-get upgrade -y --no-install-recommends git curl debian-archive-keyring postgresql-client  jq gettext-base && \
     apt-get upgrade -y --no-install-recommends vim
 COPY . /usr/local/src
