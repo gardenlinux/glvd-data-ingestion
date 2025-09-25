@@ -43,6 +43,8 @@ git clone --depth=1 https://git.kernel.org/pub/scm/linux/security/vulns.git
 
 find /usr/local/src/data -name '*source_Sources'
 
+echo "Run data ingestion (ingest-debsrc - debian forky)"
+python3 -m glvd.cli.data.ingest_debsrc debian forky /usr/local/src/data/ingest-debsrc/debian/lists/deb.debian.org_debian_dists_forky_main_source_Sources
 echo "Run data ingestion (ingest-debsrc - debian trixie)"
 python3 -m glvd.cli.data.ingest_debsrc debian trixie /usr/local/src/data/ingest-debsrc/debian/lists/deb.debian.org_debian_dists_trixie_main_source_Sources
 echo "Run data ingestion (ingest-debsrc - debian bookworm)"
