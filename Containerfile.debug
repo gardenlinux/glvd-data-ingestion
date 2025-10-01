@@ -1,4 +1,4 @@
-FROM docker.io/library/debian:trixie-slim
+FROM docker.io/library/debian:sid-slim
 
 # Sample command to run inside the container:
 #   python3 -m glvd.cli.data

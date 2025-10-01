@@ -1,4 +1,4 @@
-FROM docker.io/library/debian:trixie-slim
+FROM docker.io/library/debian:sid-slim
 
 RUN apt-get update && \
     apt-get upgrade -y --no-install-recommends python3-asyncpg python3-pip python3-poetry-core python3-requests python3-sqlalchemy && \

@@ -1,4 +1,4 @@
-FROM docker.io/library/debian:trixie-slim
+FROM docker.io/library/debian:sid-slim
 
 ENV PGHOST glvd
 ENV PGPORT 5432
