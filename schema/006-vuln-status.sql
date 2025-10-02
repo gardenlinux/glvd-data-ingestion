@@ -1,7 +1,6 @@
 SELECT
     assert_latest_migration (5);
 
-
 CREATE OR REPLACE VIEW public.sourcepackagecve AS
 SELECT
     all_cve.cve_id,
@@ -55,7 +54,6 @@ WHERE
     dist_cpe.cpe_product = 'gardenlinux'::text
     AND deb_cve.debsec_vulnerable = TRUE;
 
-
 CREATE OR REPLACE VIEW public.kernel_cve AS
 SELECT
     k.cve_id,
@@ -105,3 +103,4 @@ FROM
 
 SELECT
     log_migration (6);
+
