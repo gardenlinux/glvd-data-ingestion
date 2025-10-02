@@ -1,8 +1,31 @@
-FROM docker.io/library/debian:sid-slim
+FROM docker.io/library/debian:stable-slim
 
+# Install prerequisites and postgresql-common
 RUN apt-get update && \
-    apt-get upgrade -y --no-install-recommends python3-asyncpg python3-pip python3-poetry-core python3-requests python3-sqlalchemy && \
-    apt-get upgrade -y --no-install-recommends git curl debian-archive-keyring postgresql-client jq gettext-base
+    apt-get install -y --no-install-recommends \
+        curl \
+        ca-certificates \
+        postgresql-common \
+        python3-asyncpg \
+        python3-pip \
+        python3-poetry-core \
+        python3-requests \
+        python3-sqlalchemy \
+        git \
+        debian-archive-keyring \
+        jq \
+        gettext-base
+
+# Configure PostgreSQL upstream repository for client
+RUN install -d /usr/share/postgresql-common/pgdg && \
+    curl -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc --fail https://www.postgresql.org/media/keys/ACCC4CF8.asc && \
+    . /etc/os-release && \
+    sh -c "echo 'deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $VERSION_CODENAME-pgdg main' > /etc/apt/sources.list.d/pgdg.list"
+
+# Install PostgreSQL client (replace 18 with desired version if needed)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends postgresql-client-18
+
 COPY . /usr/local/src
 COPY keyring.asc /etc/apt/trusted.gpg.d/keyring.asc
 RUN pip install --break-system-packages --no-deps --editable /usr/local/src
