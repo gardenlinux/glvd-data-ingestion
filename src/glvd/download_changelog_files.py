@@ -23,14 +23,14 @@ logger = logging.getLogger('download_changelog_files')
 
 
 def download_apt_index_files():
-    # Download releases-patch.json and extract versions with source_repo==true
-    releases_url = "https://gardenlinux-glrd.s3.eu-central-1.amazonaws.com/releases-patch.json"
+    # Download releases-minor.json and extract versions with source_repo==true
+    releases_url = "https://gardenlinux-glrd.s3.eu-central-1.amazonaws.com/releases-minor.json"
     try:
         resp = requests.get(releases_url)
         resp.raise_for_status()
         releases_data = resp.json()
     except Exception as e:
-        logger.error(f"Failed to download or parse releases-patch.json: {e}")
+        logger.error(f"Failed to download or parse releases-minor.json: {e}")
         releases_data = {"releases": []}
 
     versions = [
