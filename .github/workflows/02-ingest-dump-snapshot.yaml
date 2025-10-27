@@ -40,7 +40,7 @@ jobs:
       run: python3 src/glvd/download_changelog_files.py
 
     - name: Upload changelog-files
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: changelog-files
         path: changelogs
@@ -109,19 +109,19 @@ jobs:
         run: |
           psql -U glvd --csv -c "select * from public.dist_cpe;" glvd > dist_cpe.csv
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: glvd.sql
           path: glvd.sql
           retention-days: 8
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: glvd-schema.sql
           path: glvd-schema.sql
           retention-days: 8
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: dist_cpe.csv
           path: dist_cpe.csv
