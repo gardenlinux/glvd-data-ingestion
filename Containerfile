@@ -22,6 +22,8 @@ RUN install -d /usr/share/postgresql-common/pgdg && \
 RUN apt-get update && \
     apt-get install -y --no-install-recommends postgresql-client-18
 
+ADD version.txt /version.txt
+
 COPY . /usr/local/src
 COPY keyring.asc /etc/apt/trusted.gpg.d/keyring.asc
 RUN pip install --break-system-packages --no-deps --editable /usr/local/src

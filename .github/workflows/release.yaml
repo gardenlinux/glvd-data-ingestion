@@ -1,0 +1,96 @@
+name: Release
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_NAME_ORG: gardenlinux
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Determine Version to Release
+        id: version
+        run: echo "VERSION=$(date --utc +%Y.%m.%d)" >> $GITHUB_ENV
+
+      - name: Set Version
+        run: echo $VERSION > version.txt
+
+      - name: Configure git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Commit version.txt to branch
+        run: |
+          git checkout -b release-version-${VERSION}
+          git add version.txt
+          git commit -m "chore: set version to ${VERSION}"
+          git tag $VERSION
+          git push --tags origin release-version-${VERSION}
+
+      - name: Install qemu dependency for multi-arch build
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-user-static
+
+      - name: Build Image glvd-data-ingestion
+        id: build_ingestion_image
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: ${{ env.IMAGE_NAME_ORG }}/glvd-data-ingestion
+          tags: ${{ env.VERSION }}
+          platforms: linux/amd64, linux/arm64
+          containerfiles: |
+            ./Containerfile
+
+      - name: Echo Outputs
+        run: |
+          echo "Image: ${{ steps.build_ingestion_image.outputs.image }}"
+          echo "Tags: ${{ steps.build_ingestion_image.outputs.tags }}"
+          echo "Tagged Image: ${{ steps.build_ingestion_image.outputs.image-with-tag }}"
+
+      - name: Push To ghcr.io
+        id: push-to-ghcr
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.build_ingestion_image.outputs.image }}
+          tags: ${{ steps.build_ingestion_image.outputs.tags }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - run: |
+          LATEST_RUN_ID=$(gh run list --repo gardenlinux/glvd-data-ingestion --status success --branch main --workflow 02-ingest-dump-snapshot.yaml --json databaseId --limit 1 | jq -r '.[0].databaseId')
+          gh run download $LATEST_RUN_ID -n glvd.sql --repo gardenlinux/glvd-data-ingestion
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: Build Image
+        id: build_init_image
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: ${{ env.IMAGE_NAME_ORG }}/glvd-init
+          tags: ${{ env.VERSION }}
+          platforms: linux/amd64, linux/arm64
+          containerfiles: |
+            ./Containerfile.pg-init
+
+      - name: Push To ghcr.io
+        id: push-to-ghcr
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.build_init_image.outputs.image }}
+          tags: ${{ steps.build_init_image.outputs.tags }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}

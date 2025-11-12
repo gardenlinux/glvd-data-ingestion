@@ -19,6 +19,8 @@ RUN install -d /usr/share/postgresql-common/pgdg && \
 RUN apt-get update && \
     apt-get install -y --no-install-recommends postgresql-client-18
 
+ADD version.txt /version.txt
+
 COPY glvd.sql /glvd.sql
 COPY pg-init-entrypoint.sh /entrypoint.sh
 
