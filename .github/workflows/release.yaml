@@ -61,7 +61,6 @@ jobs:
           echo "Tagged Image: ${{ steps.build_ingestion_image.outputs.image-with-tag }}"
 
       - name: Push To ghcr.io
-        id: push-to-ghcr
         uses: redhat-actions/push-to-registry@v2
         with:
           image: ${{ steps.build_ingestion_image.outputs.image }}
@@ -86,7 +85,6 @@ jobs:
             ./Containerfile.pg-init
 
       - name: Push To ghcr.io
-        id: push-to-ghcr
         uses: redhat-actions/push-to-registry@v2
         with:
           image: ${{ steps.build_init_image.outputs.image }}
