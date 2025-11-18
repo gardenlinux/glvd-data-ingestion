@@ -1,21 +1,45 @@
-#!/bin/bash
-set -e
+#!/usr/bin/python3
 
-# Taken from https://github.com/nalanj/migrations
-# Copyright (c) 2023 nalanj under MIT License
+# Based on [nalanj/migrations](https://github.com/nalanj/migrations), Copyright nalanj under the MIT License
 
+import os
+import sys
+import psycopg2
 
-if [ -z ${DATABASE_URL+x} ];
-then
-  echo "DATABASE_URL must be set";
-  exit 1;
-fi;
+DEFAULT_MIGRATIONS_DIR = "/usr/local/src/schema/"
 
-if [ -z ${1+x} ] || [ ! -f $1 ];
-then
-  echo "Usage: migrate [script.sql]";
-  exit 1;  
-fi;
+def main():
+    database_url = os.environ.get("DATABASE_URL")
+    if not database_url:
+        print("DATABASE_URL must be set")
+        sys.exit(1)
 
-psql $DATABASE_URL -1 -v ON_ERROR_STOP=1 -f $1;
+    if len(sys.argv) < 2:
+        print("Usage: migrate [script.sql]")
+        sys.exit(1)
 
+    # Allow user to provide just the filename, use default dir if no path
+    sql_file = sys.argv[1]
+    if not os.path.isabs(sql_file):
+        sql_file = os.path.join(DEFAULT_MIGRATIONS_DIR, sql_file)
+
+    if not os.path.isfile(sql_file):
+        print(f"SQL file not found: {sql_file}")
+        sys.exit(1)
+
+    conn = psycopg2.connect(database_url)
+    try:
+        with conn:
+            with conn.cursor() as cur:
+                with open(sql_file, "r") as f:
+                    sql_code = f.read()
+                    cur.execute(sql_code)
+        print(f"Migration {sql_file} applied successfully.")
+    except Exception as e:
+        print(f"Migration failed: {e}")
+        sys.exit(1)
+    finally:
+        conn.close()
+
+if __name__ == "__main__":
+    main()

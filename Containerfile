@@ -9,6 +9,7 @@ RUN apt-get update && \
         python3-poetry-core \
         python3-requests \
         python3-sqlalchemy \
+        python3-psycopg2 \
         git \
         debian-archive-keyring \
         jq \
