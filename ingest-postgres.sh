@@ -70,7 +70,7 @@ UNRELEASED_PATCH_VERSIONS=$(python3 /usr/local/src/unreleased-patch-versions.py 
 for unreleased in $UNRELEASED_PATCH_VERSIONS; do
     # Import with empty file for unreleased versions, this allows us to add cve context for those versions
     # Only if package list is actually empty
-    RESPONSE=$(curl -s https://glvd.ingress.glvd.gardnlinux.shoot.canary.k8s-hana.ondemand.com/v1/distro/"$unreleased")
+    RESPONSE=$(curl -s https://security.gardenlinux.org/v1/distro/"$unreleased")
     if [[ $RESPONSE = "[]" ]]; then
         EMPTY_FILE=$(mktemp)
         echo "Run data ingestion (ingest-debsrc - gardenlinux $unreleased)"
