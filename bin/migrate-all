@@ -35,7 +35,7 @@ def main(migrations_dir=DEFAULT_MIGRATIONS_DIR):
     try:
         with conn:
             with conn.cursor() as cur:
-                latest_id = 0
+                latest_id = -1
                 try:
                     cur.execute("SELECT COALESCE(MAX(id), -1) FROM migrations;")
                     latest_id = cur.fetchone()[0]
