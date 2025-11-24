@@ -36,10 +36,17 @@ def main(migrations_dir=DEFAULT_MIGRATIONS_DIR):
         with conn:
             with conn.cursor() as cur:
                 latest_id = -1
-                try:
+                cur.execute("""
+                    SELECT EXISTS (
+                        SELECT FROM information_schema.tables 
+                        WHERE table_name = 'migrations'
+                    );
+                """)
+                table_exists = cur.fetchone()[0]
+                if table_exists:
                     cur.execute("SELECT COALESCE(MAX(id), -1) FROM migrations;")
                     latest_id = cur.fetchone()[0]
-                except psycopg2.errors.UndefinedTable:
+                else:
                     print("Migrations table does not yet exist, starting from scratch")
 
                 print(f"Latest applied migration id: {latest_id}")
