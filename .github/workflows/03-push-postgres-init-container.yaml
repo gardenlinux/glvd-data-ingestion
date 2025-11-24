@@ -19,7 +19,7 @@ jobs:
       IMAGE_TAG: latest
     steps:
     - name: Checkout repo
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
     - name: Install qemu dependency for multi-arch build
       run: |
         sudo apt-get update
