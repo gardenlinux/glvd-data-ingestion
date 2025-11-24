@@ -35,8 +35,13 @@ def main(migrations_dir=DEFAULT_MIGRATIONS_DIR):
     try:
         with conn:
             with conn.cursor() as cur:
-                cur.execute("SELECT COALESCE(MAX(id), -1) FROM migrations;")
-                latest_id = cur.fetchone()[0]
+                latest_id = 0
+                try:
+                    cur.execute("SELECT COALESCE(MAX(id), -1) FROM migrations;")
+                    latest_id = cur.fetchone()[0]
+                except psycopg2.errors.UndefinedTable:
+                    print("Migrations table does not yet exist, starting from scratch")
+
                 print(f"Latest applied migration id: {latest_id}")
 
                 for file in sql_files:
