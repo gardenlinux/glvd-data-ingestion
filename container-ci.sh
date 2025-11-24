@@ -3,7 +3,7 @@
 set -euo pipefail
 set -x
 
-DATABASE_URL=glvd /usr/local/src/bin/migrate-all /usr/local/src/schema
+DATABASE_URL=postgres://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE /usr/local/src/bin/migrate-all /usr/local/src/schema
 echo ===== dump schema =====
 pg_dump --schema-only -U glvd glvd
 echo ===== dump schema =====

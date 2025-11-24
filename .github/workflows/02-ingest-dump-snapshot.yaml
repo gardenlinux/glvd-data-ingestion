@@ -88,7 +88,7 @@ jobs:
       - name: Display structure of changelog-files
         run: ls -R changelogs
 
-      - run: DATABASE_URL=glvd bin/migrate-all /usr/local/src/schema
+      - run: DATABASE_URL=postgres://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE bin/migrate-all /usr/local/src/schema
 
       - name: Ingest Data
         run: /usr/local/src/ingest-postgres.sh
