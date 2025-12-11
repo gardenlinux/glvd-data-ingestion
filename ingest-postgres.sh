@@ -112,3 +112,5 @@ python3 -m glvd.cli.data.ingest_kernel vulns/cve/published/
 # taken from https://stackoverflow.com/a/20249534
 END=$(date +%s);
 echo $((END-START)) | awk '{printf "Duration of run: %d:%02d:%02d\n", $1/3600, ($1/60)%60, $1%60}'
+
+DATABASE_URL=postgres://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE python3 /usr/local/src/src/glvd/import-source-manifest.py --manifest-dir=/usr/local/src/data/sourcemanifests/

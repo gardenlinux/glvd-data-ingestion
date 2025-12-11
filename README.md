@@ -61,6 +61,12 @@ python3 -m glvd.cli.data.ingest_nvd
 
 (Replace `today` with the version, like `1443`)
 
+## Import source packages
+
+```bash
+kubectl -n glvd run source-manifest-import$RANDOM --restart='Never' --image=ghcr.io/gardenlinux/glvd-data-ingestion:latest --env=DATABASE_URL=postgres://glvd:$(kubectl -n glvd get secret/postgres-credentials --template="{{.data.password}}" | base64 -d)@glvd-database-0.glvd-database:5432/glvd -- python3 /usr/local/src/src/glvd/import-source-manifest.py --manifest-dir=/usr/local/src/data/sourcemanifests/
+```
+
 ## Copyright Notice
 
 This project ships the following 3rd party software:
