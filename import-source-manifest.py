@@ -96,48 +96,20 @@ def main():
                         continue
                     pkgs = read_manifest(f)
 
-                    # Upsert into image_variant (image_name, image_version)
-                    # Check if entry exists for image_name, image_version, commit_id
+                    # Upsert into image_variant (image_name, image_version, commit_id)
                     cur.execute(
                         """
-                        SELECT id FROM image_variant
-                        WHERE image_name = %s AND image_version = %s AND commit_id = %s
+                        INSERT INTO image_variant (namespace, image_name, image_version, commit_id, packages)
+                        VALUES (%s, %s, %s, %s, %s)
+                        ON CONFLICT (namespace, image_name, image_version)
+                        DO UPDATE SET
+                            commit_id = EXCLUDED.commit_id,
+                            packages = EXCLUDED.packages
+                        RETURNING id
                         """,
-                        (image_name, image_version, commit_id),
+                        ("gardenlinux", image_name, image_version, commit_id, pkgs),
                     )
-                    row = cur.fetchone()
-                    if row:
-                        image_variant_id = row[0]
-                        # Update existing entry
-                        cur.execute(
-                            """
-                            UPDATE image_variant
-                            SET packages = %s
-                            WHERE id = %s
-                            RETURNING id
-                            """,
-                            (pkgs, image_variant_id),
-                        )
-                    else:
-                        # Insert new entry
-                        cur.execute(
-                            """
-                            INSERT INTO image_variant (image_name, image_version, commit_id, packages)
-                            VALUES (%s, %s, %s, %s)
-                            RETURNING id
-                            """,
-                            (image_name, image_version, commit_id, pkgs),
-                        )
-                    row = cur.fetchone()
-                    if row:
-                        image_variant_id = row[0]
-                    else:
-                        # If RETURNING doesn't work, fetch id manually
-                        cur.execute(
-                            "SELECT id FROM image_variant WHERE image_name=%s AND image_version=%s",
-                            (image_name, image_version),
-                        )
-                        image_variant_id = cur.fetchone()[0]
+                    image_variant_id = cur.fetchone()[0]
 
                     # Remove existing packages for this image_variant_id
                     cur.execute(
