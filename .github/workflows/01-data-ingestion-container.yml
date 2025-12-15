@@ -24,7 +24,7 @@ jobs:
 
     steps:
     - name: Checkout repo
-      uses: actions/checkout@v6
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
     - name: Install qemu dependency for multi-arch build
       run: |
@@ -33,7 +33,7 @@ jobs:
 
     - name: Build Image
       id: build_image
-      uses: redhat-actions/buildah-build@v2
+      uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056 # v2.13
       with:
         image: ${{ env.IMAGE_NAME }}
         tags: ${{ env.IMAGE_TAG }}
@@ -44,7 +44,7 @@ jobs:
     - name: Push To ghcr.io
       id: push-to-ghcr
       if: ${{ github.event_name != 'pull_request' }}
-      uses: redhat-actions/push-to-registry@v2
+      uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2.8
       with:
         image: ${{ steps.build_image.outputs.image }}
         tags: ${{ steps.build_image.outputs.tags }}
@@ -60,7 +60,7 @@ jobs:
 
     - name: Authenticate to cluster
       id: kube_auth
-      uses: gardener/cc-utils/.github/actions/kubernetes-auth@b158a357b8e947b3e4fc3495aad0a9307ed6d3d7
+      uses: gardener/cc-utils/.github/actions/kubernetes-auth@8ec69f5cd2e1a2cae55709af1d9703a801893dfa # ocm/0.1.0
       with:
         server: https://api.dev.gl-dev.shoot.canary.k8s-hana.ondemand.com
         server-ca-discovery-url: https://discovery.ingress.garden.canary.k8s.ondemand.com/projects/gl-dev/shoots/6a3efe36-1d56-4e07-83f6-36720207b51b/cluster-ca

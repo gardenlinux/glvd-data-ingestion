@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           fetch-depth: 0
 
@@ -52,7 +52,7 @@ jobs:
 
       - name: Build Image glvd-data-ingestion
         id: build_ingestion_image
-        uses: redhat-actions/buildah-build@v2
+        uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056 # v2.13
         with:
           image: ${{ env.IMAGE_NAME_ORG }}/glvd-data-ingestion
           tags: ${{ env.VERSION }}
@@ -67,7 +67,7 @@ jobs:
           echo "Tagged Image: ${{ steps.build_ingestion_image.outputs.image-with-tag }}"
 
       - name: Push To ghcr.io
-        uses: redhat-actions/push-to-registry@v2
+        uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2.8
         with:
           image: ${{ steps.build_ingestion_image.outputs.image }}
           tags: ${{ steps.build_ingestion_image.outputs.tags }}
@@ -82,7 +82,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
       - name: Build Image
         id: build_init_image
-        uses: redhat-actions/buildah-build@v2
+        uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056 # v2.13
         with:
           image: ${{ env.IMAGE_NAME_ORG }}/glvd-init
           tags: ${{ env.VERSION }}
@@ -91,7 +91,7 @@ jobs:
             ./Containerfile.pg-init
 
       - name: Push To ghcr.io
-        uses: redhat-actions/push-to-registry@v2
+        uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2.8
         with:
           image: ${{ steps.build_init_image.outputs.image }}
           tags: ${{ steps.build_init_image.outputs.tags }}

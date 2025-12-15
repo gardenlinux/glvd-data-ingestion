@@ -12,8 +12,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v6
-    - uses: actions/setup-python@v6
+    - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+    - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
       with:
         python-version: '3.13'
 
@@ -27,7 +27,7 @@ jobs:
 
     - name: Cache Changelogs
       id: cache-changelogs
-      uses: actions/cache@v4
+      uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
       with:
         path: changelogs
         key: debian-source-changelog-files-week-${{ steps.get-date.outputs.date }}
@@ -40,7 +40,7 @@ jobs:
       run: python3 src/glvd/download_changelog_files.py
 
     - name: Upload changelog-files
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
       with:
         name: changelog-files
         path: changelogs
@@ -73,10 +73,10 @@ jobs:
 
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v6
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Download changelog-files
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: changelog-files
           path: changelogs
@@ -109,19 +109,19 @@ jobs:
         run: |
           psql -U glvd --csv -c "select * from public.dist_cpe;" glvd > dist_cpe.csv
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: glvd.sql
           path: glvd.sql
           retention-days: 8
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: glvd-schema.sql
           path: glvd-schema.sql
           retention-days: 8
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: dist_cpe.csv
           path: dist_cpe.csv
