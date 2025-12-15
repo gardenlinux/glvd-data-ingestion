@@ -54,7 +54,7 @@ jobs:
           echo "$PGHOST:$PGPORT:$PGDATABASE:$PGUSER:$PGPASSWORD" > ~/.pgpass
           chmod 0600 ~/.pgpass
 
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           name: previous-glvd.sql
 
