@@ -27,7 +27,7 @@ jobs:
 
     - name: Cache Changelogs
       id: cache-changelogs
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: changelogs
         key: debian-source-changelog-files-week-${{ steps.get-date.outputs.date }}
