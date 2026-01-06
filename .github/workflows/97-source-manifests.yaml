@@ -89,8 +89,10 @@ jobs:
         run: |
           mkdir flat_sourcemanifests
           find all_sourcemanifests -type f -name '*.sourcemanifest' -exec mv {} flat_sourcemanifests/ \;
-      - name: Zip all sourcemanifests (no subdirectories)
-        run: |
+
+          find all_sourcemanifests -type f -name '*.sourcemanifest'
+          ls flat_sourcemanifests
+
           git checkout -b update-source-manifests-${{ github.event.inputs.tag }}
 
           mv flat_sourcemanifests/* data/sourcemanifests
