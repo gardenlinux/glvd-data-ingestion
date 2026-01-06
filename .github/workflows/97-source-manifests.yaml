@@ -1,0 +1,72 @@
+name: Generate Source Manifests
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to build (e.g. main, 1443.18)"
+        required: true
+        default: "main"
+
+jobs:
+  build-images:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image:
+          - "ali"
+          - "aws"
+          - "azure"
+          - "gcp"
+          - "openstack"
+    steps:
+      - name: Checkout workflow repo
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Clone gardenlinux repo
+        run: |
+          git clone https://github.com/gardenlinux/gardenlinux.git
+          cd gardenlinux
+
+          if [ "${{ github.event.inputs.tag }}" != "main" ]; then
+            git fetch --tags
+            git checkout tags/${{ github.event.inputs.tag }}
+          fi
+
+      - name: Save latest commit id
+        id: commit_id
+        run: |
+          cd gardenlinux
+          echo "commit_id=$(git rev-parse --short=8 HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Build image
+        run: |
+          cd gardenlinux
+          # for versions that start with 14 or 15, download the keyring from main branch
+          if [[ "${{ github.event.inputs.tag }}" =~ ^14|^15 ]]; then
+            rm keyring.gpg
+            curl -L -o keyring.gpg https://github.com/gardenlinux/gardenlinux/raw/refs/heads/main/keyring.gpg
+          fi
+          ./build --container-image ghcr.io/gardenlinux/builder:04e9781b20811f22d51aa0edcfa03d2ad1a9c4df "${{ matrix.image }}-gardener_prod"
+
+      - name: Replace '-local' with '-${{ steps.commit_id.outputs.commit_id }}' in sourcemanifest filenames
+        shell: python
+        run: |
+          import glob
+          import os
+          import sys
+
+          commit_id = os.environ.get('COMMIT_ID', '${{ steps.commit_id.outputs.commit_id }}')
+          for f in glob.glob('gardenlinux/.build/*-local.sourcemanifest'):
+            if not os.path.exists(f):
+              continue
+            newf = f.replace('-local.sourcemanifest', f'-{commit_id}.sourcemanifest')
+            os.rename(f, newf)
+
+      - name: Upload sourcemanifest artifact
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: sourcemanifest-${{ github.event.inputs.tag }}-${{ matrix.image }}
+          path: gardenlinux/.build/*.sourcemanifest
+          include-hidden-files: true
