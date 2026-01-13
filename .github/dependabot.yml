@@ -5,11 +5,13 @@ updates:
     schedule:
       interval: "weekly"
 
-  - package-ecosystem: pip
-    directory: /
+  - package-ecosystem: "pip"
+    directory: "/"
     schedule:
       interval: "weekly"
-      groups:
+    groups:
+        # Group all dependencies by with minor or patch version updates into one
+        # PR with production and development dependencies grouped into separate PRs.
         production-dependencies:
             dependency-type: "production"
             applies-to: "version-updates"
@@ -26,4 +28,3 @@ updates:
             update-types:
                 - "minor"
                 - "patch"
- 
