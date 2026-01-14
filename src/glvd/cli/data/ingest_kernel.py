@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 # LTS kernel versions to check.
 # This needs to be updated once we support a new kernel version, or drop support for one.
 # fixme(fwilhe): Get rid of the need for manual maintenance.
-lts_versions = ["6.6", "6.12"]
+lts_versions = ["6.6", "6.12", "6.18"]
 
 # List of irrelevant kernel subsystems in the context of Garden Linux.
 # We still record CVEs related to those subsystems, but we'll focus less on them.
