@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - run: |
           LATEST_RUN_ID=$(gh run list --repo gardenlinux/glvd-data-ingestion --branch main --workflow 02-ingest-dump-snapshot.yaml --json databaseId --limit 1 | jq -r '.[0].databaseId')
           gh run download $LATEST_RUN_ID -n glvd.sql --repo gardenlinux/glvd-data-ingestion
@@ -48,7 +48,7 @@ jobs:
 
     steps:
       - name: Check out repository code
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - run: |
           echo "$PGHOST:$PGPORT:$PGDATABASE:$PGUSER:$PGPASSWORD" > ~/.pgpass
