@@ -7,7 +7,7 @@ services:
     networks:
       - glvd_ingest
     volumes:
-      - glvd_db_ingest_volume:/var/lib/postgresql/data
+      - glvd_db_ingest_volume:/var/lib/postgresql
     environment:
       POSTGRES_USER: glvd
       POSTGRES_DB: glvd
