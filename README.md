@@ -8,6 +8,7 @@ GLVD aggregates vulnerability data from multiple trusted sources to provide comp
 
 - **NIST National Vulnerability Database (NVD):** A widely recognized repository of standardized vulnerability information.
 - **Debian Security Tracker:** The authoritative source for security issues affecting Debian packages.
+- **Debian and Garden Linux apt repo:** Information on which packages exist in a given version of Garden Linux or Debian.
 - **Debian Package Changelogs:** These logs offer insights into security fixes and updates directly from package maintainers.
 - **kernel.org:** The official source for Linux kernel-specific CVEs and related security advisories.
 - **CVE Triage Data from the Garden Linux Team:** Expert-reviewed data curated specifically for Garden Linux.
@@ -23,16 +24,28 @@ flowchart TD
         DEB["Debian Security Tracker"]
         CHANGELOGS["Debian Changelogs"]
         KERNEL["kernel.org (upstream)"]
+        GLAPT["Garden Linux apt repo"]
+        DEBAPT["Debian apt repo"]
         INGESTION["Ingestion Process"]
         DB["GLVD Database"]
     end
 
     NVD -- Ingests --> INGESTION
     DEB -- Ingests --> INGESTION
+    GLAPT -- Ingests --> INGESTION
+    DEBAPT -- Ingests --> INGESTION
     CHANGELOGS -- Ingests --> INGESTION
     KERNEL -- Ingests --> INGESTION
     INGESTION -- Updates daily --> DB
 ```
+
+## Kubernetes Ingestion Cron Job
+
+In Kubernetes environments, data ingestion is automated using a cron job. This ensures the cluster's database is kept up-to-date on a regular schedule.
+
+The cron job uses the container image built by the "01 - Build and Push Data Ingestion Container" workflow.
+The cron job configuration can be found [here](https://github.com/gardenlinux/glvd/blob/main/deployment/k8s/02_ingestion-job.yaml).
+This setup helps maintain current vulnerability data in your GLVD database with minimal manual intervention.
 
 ## Data Ingestion GitHub Actions workflows
 
@@ -98,17 +111,43 @@ The main container for data ingestion.
 - Used for production ingestion jobs and as the base for most workflows.
 - This container is built and published using workflow "01 - Build and Push Data Ingestion Container"
 
+> **ℹ️ Note:**  
+> This container is part of GLVD releases—there is a **tagged image for each release**.
+> Find the images [here](https://github.com/gardenlinux/glvd-data-ingestion/pkgs/container/glvd-data-ingestion).
+
 ### **Containerfile.pg-init**
 Initializes a PostgreSQL database for GLVD.
 - Installs the PostgreSQL client.
 - Loads the database schema and initial data from a SQL file.
 - Used for local development and to quickly bootstrap live clusters.
 
+> **ℹ️ Note:**  
+> This container is part of GLVD releases—there is a **tagged image for each release**.
+> Find the images [here](https://github.com/gardenlinux/glvd-data-ingestion/pkgs/container/glvd-init).
+
 ### **Containerfile.unit-tests**
 A container for running Python unit tests.
 - Installs all Python dependencies and `pytest`.
 - Entry point runs the test suite.
-- Used in CI to validate code changes.
+
+Unit tests can also be run without this container by running 
+
+```bash
+source .venv/bin/activate
+./unit-tests.sh
+```
+
+There are also **integration tests** which can be run via
+
+```bash
+# In one terminal, build and run the database for the integration tests
+cd tests/integration/db
+make && make run
+
+# In another terminal, run the tests
+source .venv/bin/activate
+./integration-tests.sh
+```
 
 ### **Containerfile.pg-formatter**
 Provides the [pgFormatter](https://github.com/darold/pgFormatter) tool for formatting SQL files.
@@ -119,6 +158,21 @@ Provides the [pgFormatter](https://github.com/darold/pgFormatter) tool for forma
 A debug/development container for interactive testing.
 - Installs extra tools and all Python dependencies.
 - Useful for manual debugging and development inside the container.
+
+Can be used with `compose.yaml` to bring up da development environment
+
+```
+podman compose --file compose.yaml up
+podman exec -it glvd-data-ingestion-ingest-1 bash
+```
+
+Sample command to run inside the container:
+
+```
+python3 -m glvd.cli.data
+python3 -m glvd.cli.data.ingest_kernel /vulns/cve/published/ --debug
+python3 -m glvd.cli.data.ingest_changelogs 1592.7
+```
 
 ### **Containerfile.changelog-downloader**
 Builds a minimal container for downloading Debian changelog files.
