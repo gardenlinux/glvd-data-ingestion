@@ -115,6 +115,15 @@ def compare_versions(v1: str, v2: str) -> int:
     return 0
 
 
+def version_leq(v1: str, v2: str) -> bool:
+    # Returns True if v1 <= v2 (semver, but simple)
+    return compare_versions(v1, v2) <= 0
+
+
+def version_lt(v1: str, v2: str) -> bool:
+    return compare_versions(v1, v2) < 0
+
+
 def is_relevant_subsystem(program_files: list[str]) -> bool:
     for file in program_files:
         for submodule in irrelevant_subsystems:
@@ -127,31 +136,31 @@ def get_fixed_versions(
     lts_versions: list[str], cve_data: dict
 ) -> dict[str, str | None]:
     fixed_versions = dict.fromkeys(lts_versions, None)
-
-    for entry in cve_data["containers"]["cna"]["affected"]:
-        if "versions" not in entry:
-            logging.debug(f"No 'versions' key in entry: {entry}")
-            continue
-
-        for ver in entry["versions"]:
-            version: str = ver["version"]
-            if ver["status"] == "unaffected":
-                for lts in lts_versions:
-                    if version.startswith(lts):
-                        if (
-                            fixed_versions[lts] is None
-                            or compare_versions(version, fixed_versions[lts]) < 0
-                        ):
-                            logging.debug(
-                                f"Updating fixed version for {lts}: {fixed_versions[lts]} -> {version}"
-                            )
-                            fixed_versions[lts] = version
-                        else:
-                            logging.debug(
-                                f"Skipping version {version} for {lts} as it is not earlier than {fixed_versions[lts]}"
-                            )
-            else:
-                logging.debug(f"Version {version} is affected, skipping")
+    for lts in lts_versions:
+        status = cve_data["containers"]["cna"].get("defaultStatus", "affected")
+        for entry in cve_data["containers"]["cna"]["affected"]:
+            if "versions" not in entry:
+                continue
+            for ver in entry["versions"]:
+                v = ver["version"]
+                s = ver["status"]
+                # Direct match
+                if v == lts and s == "affected":
+                    status = "affected"
+                # Range: lessThan
+                if "lessThan" in ver and s == "unaffected":
+                    if version_lt(lts, ver["lessThan"]):
+                        status = "unaffected"
+                # Range: lessThanOrEqual
+                if "lessThanOrEqual" in ver and s == "unaffected":
+                    if ver["lessThanOrEqual"] == "*" or version_leq(
+                        lts, ver["lessThanOrEqual"].replace("*", "")
+                    ):
+                        status = "unaffected"
+                # Direct unaffected
+                if v == lts and s == "unaffected":
+                    status = "unaffected"
+        fixed_versions[lts] = None if status == "affected" else lts
     return fixed_versions
 
 
