@@ -7,31 +7,30 @@ def get_next_unreleased_versions(version_string: str) -> str:
     >>> get_next_unreleased_versions("1592.4")
     '1592.5'
     >>> get_next_unreleased_versions("1877.10.0")
-    '1877.11.0'
+    '1877.11'
     >>> get_next_unreleased_versions("2345.0")
     '2345.1.0'
-    >>> get_next_unreleased_versions("1877.10 1592.4 2345.1")
-    '1592.5 1877.11.0 2345.2.0'
+    >>> get_next_unreleased_versions("1877.10 1877.9 1592.4 1592.3 2345.1")
+    '1592.5 1877.11 2345.2.0'
 
     """
-    versions = version_string.split()
-    major_versions = {}
 
-    for version in versions:
-        version_split = list(map(int, version.split('.')))
-        major = version_split[0]
-        minor = version_split[1]
+    garden_linux_versions = version_string.split()
+    versions = {}
 
-        if major not in major_versions:
-            major_versions[major] = minor
+    for version in garden_linux_versions:
+        major, minor = map(int, version.split('.')[:2])
+
+        if major not in versions:
+            versions[major] = minor
         else:
-            major_versions[major] = max(major_versions[major], minor)
+            versions[major] = max(versions[major], minor)
 
 
     next_versions = []
-    for major, minor in sorted(major_versions.items()):
+    for major, minor in sorted(versions.items()):
          next_version = f"{major}.{minor + 1}"
-         if major >= 1877:
+         if major >= 2013:
              next_version += ".0"
          next_versions.append(next_version)
 
