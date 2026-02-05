@@ -32,7 +32,9 @@ def get_next_unreleased_versions(version_string: str) -> str:
     next_versions = []
     for major, minor in sorted(versions.items()):
         next_version = f"{major}.{minor + 1}"
-        if major >= 2013:
+        # releases after 2017 should be triple digit versions, e.g. 2017.0.0
+        # https://github.com/gardenlinux/gardenlinux?tab=readme-ov-file#-important-
+        if major >= 2017:
             next_version += ".0"
         next_versions.append(next_version)
 
