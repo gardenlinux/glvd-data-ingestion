@@ -11,7 +11,9 @@ def get_next_unreleased_versions(version_string: str) -> str:
     '1877.11'
     >>> get_next_unreleased_versions("2345.0")
     '2345.1.0'
-    >>> get_next_unreleased_versions("1877.10 1877.9 1592.4 1592.3 2345.1")
+    >>> get_next_unreleased_versions("2345.0.0")
+    '2345.1.0'
+    >>> get_next_unreleased_versions("1877.10 1877.9 1592.4 1592.3 2345.1.0")
     '1592.5 1877.11 2345.2.0'
 
     """
