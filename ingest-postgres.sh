@@ -4,7 +4,7 @@ set -euo pipefail
 
 START=$(date +%s)
 
-GL_VERSIONS_WITH_SOURCE_REPO=$(curl https://gardenlinux-glrd.s3.eu-central-1.amazonaws.com/releases-minor.json |  jq --join-output '.releases[] | select(.attributes.source_repo==true) | "\(.version.major).\(.version.minor) "')
+GL_VERSIONS_WITH_SOURCE_REPO=$(curl https://gardenlinux-glrd.s3.eu-central-1.amazonaws.com/releases-minor.json | jq --join-output '.releases[] | select(.attributes.source_repo==true) | if .version.patch == null then "\(.version.major).\(.version.minor) " else "\(.version.major).\(.version.minor).\(.version.patch) " end')
 export GL_VERSIONS_WITH_SOURCE_REPO
 
 echo Supporting Garden Linux versions "$GL_VERSIONS_WITH_SOURCE_REPO"
