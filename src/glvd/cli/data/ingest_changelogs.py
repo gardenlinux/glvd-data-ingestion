@@ -74,6 +74,24 @@ class IngestChangelogs:
         engine: AsyncEngine,
     ) -> None:
         async with async_sessionmaker(engine)() as session:
+            # Early exit if automated changelogs already exist for this version
+            result = await session.execute(
+                select(CveContext).where(
+                    CveContext.gardenlinux_version == str(self.gl_version),
+                    CveContext.description.like("Automated%"),
+                )
+            )
+            count = (
+                result.raw.rowcount
+                if hasattr(result.raw, "rowcount")
+                else len(result.scalars().all())
+            )
+            if count > 0:
+                logger.info(
+                    f"Automated changelog entries already exist for Garden Linux {self.gl_version}, skipping."
+                )
+                return
+
             logger.info(f"Ingesting Changelogs for Garden Linux {self.gl_version}")
             result = await session.execute(
                 select(CveContext).where(CveContext.gardenlinux_version == str(self.gl_version))
