@@ -33,11 +33,14 @@ def download_apt_index_files():
         logger.error(f"Failed to download or parse releases-minor.json: {e}")
         releases_data = {"releases": []}
 
-    versions = [
-        f"{r['version']['major']}.{r['version']['minor']}"
-        for r in releases_data.get("releases", [])
-        if r.get("attributes", {}).get("source_repo") is True
-    ]
+    versions = []
+    releases = releases_data.get("releases", [])
+    for r in releases:
+        if 'attributes' in r and 'source_repo' in r['attributes'] and r['attributes']['source_repo'] is True:
+            if 'patch' in r['version']:
+                versions.append(f"{r['version']['major']}.{r['version']['minor']}.{r['version']['patch']}")
+            else:
+                versions.append(f"{r['version']['major']}.{r['version']['minor']}")
 
     output_dir = "./lists"
     os.makedirs(output_dir, exist_ok=True)
