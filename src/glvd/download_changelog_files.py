@@ -36,11 +36,13 @@ def download_apt_index_files():
     versions = []
     releases = releases_data.get("releases", [])
     for r in releases:
-        if 'attributes' in r and 'source_repo' in r['attributes'] and r['attributes']['source_repo'] is True:
+        release_attributes = r.get("attributes", {})
+        if release_attributes.get("source_repo") is True:
             if 'patch' in r['version']:
-                versions.append(f"{r['version']['major']}.{r['version']['minor']}.{r['version']['patch']}")
+                version_string = "{major}.{minor}.{patch}"
             else:
-                versions.append(f"{r['version']['major']}.{r['version']['minor']}")
+                version_string = "{major}.{minor}"
+            versions.append(version_string.format(**r['version']))
 
     output_dir = "./lists"
     os.makedirs(output_dir, exist_ok=True)
