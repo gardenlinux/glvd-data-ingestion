@@ -21,6 +21,17 @@ services:
       start_period: 30s
       timeout: 10s
 
+  glvd-init:
+    image: ghcr.io/gardenlinux/glvd-init:latest
+    networks:
+      - glvd_ingest
+    depends_on:
+      glvd-postgres:
+        condition: service_healthy
+        restart: false
+    environment:
+      PGHOST: glvd-postgres
+
   ingest:
     build:
       dockerfile: Containerfile.debug
@@ -29,6 +40,9 @@ services:
     depends_on:
       glvd-postgres:
         condition: service_healthy
+        restart: false
+      glvd-init:
+        condition: service_completed_successfully
         restart: false
     environment:
       PGHOST: glvd-postgres
