@@ -7,6 +7,8 @@ import logging
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
+from requests.exceptions import ChunkedEncodingError, ConnectionError
+
 from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import (
@@ -65,30 +67,50 @@ class IngestNvd:
         params: dict[str, str],
     ) -> None:
         offset = 0
+        max_stream_retries = 5
 
         while True:
-            resp = rsession.get(
-                'https://services.nvd.nist.gov/rest/json/cves/2.0/',
-                params=params | {
-                    'startIndex': str(offset),
-                },
-            )
-            resp.raise_for_status()
-            data = resp.json()
+            stream_attempts = 0
+            data = None
 
-            logger.debug(f'Expect total results {data["totalResults"]}')
+            while stream_attempts < max_stream_retries:
+                try:
+                    resp = rsession.get(
+                        'https://services.nvd.nist.gov/rest/json/cves/2.0/',
+                        params=params | {
+                            'startIndex': str(offset),
+                            'resultsPerPage': '500',
+                        },
+                    )
+                    resp.raise_for_status()
+                    data = resp.json()
+                    break
 
-            if entries := data['vulnerabilities']:
+                except (ChunkedEncodingError, ConnectionError) as stream_err:
+                    stream_attempts += 1
+                    logger.warning(
+                        f"NVD stream dropped mid-transfer at offset {offset} (Attempt {stream_attempts}/{max_stream_retries}). "
+                        f"Error: {stream_err}"
+                    )
+                    if stream_attempts >= max_stream_retries:
+                        logger.error("Max mid-stream retry limit reached. Aborting ingestion.")
+                        raise
+
+                    await asyncio.sleep(self.wait + (2 ** stream_attempts))
+
+            logger.info(f'Expect total results {data["totalResults"]}')
+
+            entries = data.get('vulnerabilities', [])
+            if entries:
                 await self.insert_cve(conn, entries)
 
                 offset += len(entries)
                 logger.debug(f'Inserted {len(entries)} entries')
-
-                await asyncio.sleep(self.wait)
-
-            # No more entries left
             else:
+                logger.info("No more entries returned by API.")
                 break
+
+            await asyncio.sleep(self.wait)
 
     async def fetch_cve(
         self,
