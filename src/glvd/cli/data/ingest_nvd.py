@@ -134,10 +134,21 @@ class IngestNvd:
             # It turns out, we don't work on a stable snapshot, and the
             # modification timestamp changes.
             check = last_mod - timedelta(days=7)
-            params: dict[str, str] = {
-                'lastModStartDate': check.isoformat(),
-                'lastModEndDate': now.isoformat(),
-            }
+            # In June 2026 95% of the entries were changed and so their modified date.
+            # This broke one of our ingestion pipelines (runtime > 6h) and made by that new
+            # releases imposible to deploy. Hence, this quick fix of using the publication
+            # date during this transition period.
+            params = None
+            if check >= datetime.datetime(2026, 7, 1, 0, 0):
+                params: dict[str, str] = {
+                    'lastModStartDate': check.isoformat(),
+                    'lastModEndDate': now.isoformat(),
+                }
+            else:
+                params: dict[str, str] = {
+                    'pubStartDate': check.isoformat(),
+                    'pubEndDate': now.isoformat(),
+                }
 
             logger.info(f'Requesting data from {start} to {now}')
             await self.fetch_cve_impl(conn, rsession, params)
