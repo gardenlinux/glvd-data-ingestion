@@ -139,7 +139,7 @@ class IngestNvd:
             # releases imposible to deploy. Hence, this quick fix of using the publication
             # date during this transition period.
             params = None
-            if check >= datetime.datetime(2026, 7, 1, 0, 0):
+            if check >= datetime(2026, 7, 1, 0, 0, tzinfo=timezone.utc):
                 params: dict[str, str] = {
                     'lastModStartDate': check.isoformat(),
                     'lastModEndDate': now.isoformat(),
