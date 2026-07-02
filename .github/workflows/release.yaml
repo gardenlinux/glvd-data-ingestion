@@ -80,11 +80,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - run: |
+      - name: Get lastest data dump
+        if: ${{ inputs.create_init_image == true }}
+        run: |
           LATEST_RUN_ID=$(gh run list --repo gardenlinux/glvd-data-ingestion --status success --branch main --workflow 02-ingest-dump-snapshot.yaml --json databaseId --limit 1 | jq -r '.[0].databaseId')
           gh run download $LATEST_RUN_ID -n glvd.sql --repo gardenlinux/glvd-data-ingestion
         env:
           GH_TOKEN: ${{ github.token }}
+
       - name: Build Image (init image)
         if: ${{ inputs.create_init_image == true }}
         id: build_init_image
