@@ -1,6 +1,11 @@
 name: Release
 on:
   workflow_dispatch:
+    inputs:
+      create_init_image:
+        description: 'Create the additional init image with the latest sql data dump from pipeline 02'
+        type: boolean
+        default: true
 
 permissions:
   contents: write
@@ -80,7 +85,8 @@ jobs:
           gh run download $LATEST_RUN_ID -n glvd.sql --repo gardenlinux/glvd-data-ingestion
         env:
           GH_TOKEN: ${{ github.token }}
-      - name: Build Image
+      - name: Build Image (init image)
+        if: ${{ inputs.create_init_image == true }}
         id: build_init_image
         uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056 # v2.13
         with:
@@ -90,7 +96,8 @@ jobs:
           containerfiles: |
             ./Containerfile.pg-init
 
-      - name: Push To ghcr.io
+      - name: Push To ghcr.io (init image)
+        if: ${{ inputs.create_init_image == true }}
         uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2.8
         with:
           image: ${{ steps.build_init_image.outputs.image }}
