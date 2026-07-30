@@ -2,18 +2,21 @@
 
 from __future__ import annotations
 
+import logging
 import re
 from typing import TextIO
 
 from ..database import DebsecCve
 from glvd.util.minor import extract_minor
 
+logger = logging.getLogger(__name__)
+
 
 class DebsecCveFile(dict[str, dict[tuple[str, str], DebsecCve]]):
     __re = re.compile(r'''
         ^(?:
             (?P<id>[A-Z0-9-]+)
-            (?:\s+[\[(].*?[\])])?
+            (?:\s+[\[\]()].*?[\])])?
             |
             \s+
             (?:
@@ -58,8 +61,8 @@ class DebsecCveFile(dict[str, dict[tuple[str, str], DebsecCve]]):
                     current_id = i
                 elif match['source']:
                     self._read_source(current_id, match)
-            else:
-                raise RuntimeError(f'Unable to read line: {line}')
+            elif line.strip():
+                logger.warning(f'Unable to read line: {line!r}')
 
 
 if __name__ == '__main__':
