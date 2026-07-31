@@ -72,7 +72,7 @@ jobs:
           echo "Tagged Image: ${{ steps.build_ingestion_image.outputs.image-with-tag }}"
 
       - name: Push To ghcr.io
-        uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2.8
+        uses: redhat-actions/push-to-registry@94ade333c38ecc0e60e94785125d9a52ca423b37 # v3.0.0
         with:
           image: ${{ steps.build_ingestion_image.outputs.image }}
           tags: ${{ steps.build_ingestion_image.outputs.tags }}
@@ -101,7 +101,7 @@ jobs:
 
       - name: Push To ghcr.io (init image)
         if: ${{ inputs.create_init_image == true }}
-        uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2.8
+        uses: redhat-actions/push-to-registry@94ade333c38ecc0e60e94785125d9a52ca423b37 # v3.0.0
         with:
           image: ${{ steps.build_init_image.outputs.image }}
           tags: ${{ steps.build_init_image.outputs.tags }}
