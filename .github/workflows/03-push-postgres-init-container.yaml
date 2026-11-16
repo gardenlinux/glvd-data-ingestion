@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   push-init-container:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     env:
       IMAGE_NAME: gardenlinux/glvd-init
       IMAGE_TAG: latest
@@ -23,7 +23,7 @@ jobs:
     - name: Install qemu dependency for multi-arch build
       run: |
         sudo apt-get update
-        sudo apt-get install -y qemu-user-static
+        sudo apt-get install -y qemu-user-binfmt
     - run: |
         LATEST_RUN_ID=$(gh run list --repo gardenlinux/glvd-data-ingestion --status success --branch main --workflow 02-ingest-dump-snapshot.yaml --json databaseId --limit 1 | jq -r '.[0].databaseId')
         gh run download $LATEST_RUN_ID -n glvd.sql --repo gardenlinux/glvd-data-ingestion

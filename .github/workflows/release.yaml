@@ -53,7 +53,7 @@ jobs:
       - name: Install qemu dependency for multi-arch build
         run: |
           sudo apt-get update
-          sudo apt-get install -y qemu-user-static
+          sudo apt-get install -y qemu-user-binfmt
 
       - name: Build Image glvd-data-ingestion
         id: build_ingestion_image
