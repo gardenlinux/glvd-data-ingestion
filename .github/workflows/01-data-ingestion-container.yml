@@ -15,7 +15,7 @@ permissions:
 jobs:
   push-data-ingestion-container:
     name: data_ingestion
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     env:
       IMAGE_NAME: gardenlinux/glvd-data-ingestion
       IMAGE_TAG: latest
@@ -29,7 +29,7 @@ jobs:
     - name: Install qemu dependency for multi-arch build
       run: |
         sudo apt-get update
-        sudo apt-get install -y qemu-user-static
+        sudo apt-get install -y qemu-user-binfmt
 
     - name: Build Image
       id: build_image
