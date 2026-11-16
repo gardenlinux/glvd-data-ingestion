@@ -7,7 +7,7 @@ import logging
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
-from requests.exceptions import ChunkedEncodingError, ConnectionError
+from requests.exceptions import ChunkedEncodingError, ConnectionError, HTTPError
 
 from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert
@@ -86,14 +86,14 @@ class IngestNvd:
                     data = resp.json()
                     break
 
-                except (ChunkedEncodingError, ConnectionError) as stream_err:
+                except (ChunkedEncodingError, ConnectionError, HTTPError) as stream_err:
                     stream_attempts += 1
                     logger.warning(
-                        f"NVD stream dropped mid-transfer at offset {offset} (Attempt {stream_attempts}/{max_stream_retries}). "
+                        f"NVD request failed at offset {offset} (Attempt {stream_attempts}/{max_stream_retries}). "
                         f"Error: {stream_err}"
                     )
                     if stream_attempts >= max_stream_retries:
-                        logger.error("Max mid-stream retry limit reached. Aborting ingestion.")
+                        logger.error("Max retry limit reached. Aborting ingestion.")
                         raise
 
                     await asyncio.sleep(self.wait + (2 ** stream_attempts))

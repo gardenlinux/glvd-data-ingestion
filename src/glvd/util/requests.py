@@ -13,7 +13,7 @@ class RetrySession(requests.Session):
                 total=30,
                 backoff_factor=10,
                 allowed_methods=None,
-                status_forcelist=[429, 500, 502, 503, 504],
+                status_forcelist=[429, 500, 502, 503, 504, 524],
             ),
         )
         self.mount("https://", adapter)
